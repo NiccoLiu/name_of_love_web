@@ -137,7 +137,7 @@ public class ReceiverMessageServiceImpl implements ReceiverMessageService {
      */
     public String replyText() {
         StringBuffer sb = new StringBuffer();
-        sb.append("正在为您接入客服，请稍候...或拨打客服电话：020-89224118");
+        sb.append("正在为您接入客服，请稍候...或拨打客服电话：15974012112");
         return sb.toString();
     }
 
@@ -148,14 +148,14 @@ public class ReceiverMessageServiceImpl implements ReceiverMessageService {
      */
     public String subscribeText() {
         StringBuffer sb = new StringBuffer();
-        sb.append("您好，欢迎关注高速顺通。\n\n");
-        sb.append("点击“自动付”，实现高速出口自动扣费，提高您的通行效率。");
+        sb.append("您好，欢迎关注以爱为名。\n\n");
+        sb.append("我们的口号是:以爱为名,健康出行!");
         return sb.toString();
     }
 
     public String contactText() {
         StringBuffer sb = new StringBuffer();
-        sb.append("请直接发送消息，我们将在24小时内给您回复，或拨打客服电话：020-89224118");
+        sb.append("请直接发送消息，我们将在24小时内给您回复，或拨打客服电话：15974012112");
         return sb.toString();
     }
 
