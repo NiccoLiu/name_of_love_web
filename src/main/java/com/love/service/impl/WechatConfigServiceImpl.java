@@ -35,6 +35,28 @@ public class WechatConfigServiceImpl implements WechatConfigService {
     RedisService redisService;
 
     @Override
+    public ResultInfo getUserInfoByCode(JSONObject jsonObject) {
+        ResultInfo resultInfo = new ResultInfo(0, "success");
+        String code = jsonObject.getString("code");
+
+        String dataString = WechatHttpUtil.requestUrl(
+                wechatProp.getOauthToken().replace("APPID", wechatProp.getAppid())
+                        .replace("SECRET", wechatProp.getAppsecret()).replace("CODE", code),
+                "GET", null);
+        LOGGER.info("get wechat openId info is:{}", dataString);
+        JSONObject dataObject = JSONObject.parseObject(dataString);
+        String access_token = dataObject.getString("access_token");
+        String openId = dataObject.getString("openid");
+
+        String userJson = WechatHttpUtil.requestUrl(wechatProp.getAppUserInfoUrl()
+                .replace("ACCESS_TOKEN", access_token).replace("OPENID", openId), "GET", null);
+        JSONObject userObject = JSONObject.parseObject(userJson);
+        LOGGER.info("get wechat user info is:{}", userObject);
+        resultInfo.setData(userJson);
+        return resultInfo;
+    }
+
+    @Override
     public ResultInfo configJssdk() {
         ResultInfo resultInfo = new ResultInfo(0, "success");
 
