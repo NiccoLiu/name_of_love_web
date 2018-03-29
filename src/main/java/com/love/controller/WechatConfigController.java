@@ -135,6 +135,7 @@ public class WechatConfigController {
             throws IOException {
         String code = request.getParameter("code");
         String model = request.getParameter("state");
+        Logger.info("code is {},model is {}", code, model);
         if (StringUtils.isNotBlank(code) && StringUtils.isNotBlank(model)) {
             String jsonString = WechatHttpUtil.requestUrl(
                     wechatProp.getOauthToken().replace("APPID", wechatProp.getAppid())
@@ -149,14 +150,11 @@ public class WechatConfigController {
                     .replace("ACCESS_TOKEN", accessToken).replace("OPENID", openId), "GET", null);
             JSONObject userObject = JSONObject.parseObject(userJson);
             Logger.info("get wechat user info is:{}", userObject);
-            String unionId = userObject.getString("unionid");
 
-            if (StringUtils.isNotBlank(unionId)) {
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append(wechatProp.getIndexHtml());
-                Logger.info("index url is {}", stringBuilder.toString());
-                response.sendRedirect(stringBuilder.toString());
-            }
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(wechatProp.getIndexHtml());
+            Logger.info("index url is {}", stringBuilder.toString());
+            response.sendRedirect(stringBuilder.toString());
         } else {
             throw new BussinessException(BizExceptionEnum.ORDER_URL_ERROR);
         }
