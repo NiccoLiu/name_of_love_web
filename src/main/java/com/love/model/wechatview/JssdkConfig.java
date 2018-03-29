@@ -1,4 +1,4 @@
-package com.love.util;
+package com.love.model.wechatview;
 
 import java.util.List;
 

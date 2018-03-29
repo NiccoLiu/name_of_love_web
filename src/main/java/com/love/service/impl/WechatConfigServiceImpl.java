@@ -16,9 +16,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.love.config.WechatProperties;
 import com.love.model.ResultInfo;
 import com.love.model.Token;
+import com.love.model.wechatview.JssdkConfig;
 import com.love.service.RedisService;
 import com.love.service.WechatConfigService;
-import com.love.util.JssdkConfig;
 import com.love.util.SHA1Util;
 import com.love.util.WechatHttpUtil;
 
