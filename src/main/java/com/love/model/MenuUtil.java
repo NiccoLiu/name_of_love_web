@@ -40,7 +40,7 @@ public class MenuUtil {
         ViewButton btn1 = new ViewButton();
         btn1.setName("首页");
         btn1.setType("view");
-        btn1.setUrl("https://www.baidu.com");
+        btn1.setUrl("http://iot.1000mob.com/dev/config/menu/index");
 
         ViewButton btn2 = new ViewButton();
         btn2.setName("推广");

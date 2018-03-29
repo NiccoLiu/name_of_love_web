@@ -110,7 +110,7 @@ public class WechatConfigController {
         return wechatConfigService.configJssdk();
     }
 
-    @GetMapping("/menu/autoPay/{model}")
+    @GetMapping("/menu/{model}")
     public void queryDeviceInfo(HttpServletResponse response, @PathVariable("model") String model)
             throws IOException {
         String redirectUrl = setUrlEncodeUTF8(wechatProp.getAutoPayRedirectUrl());
@@ -153,31 +153,8 @@ public class WechatConfigController {
 
             if (StringUtils.isNotBlank(unionId)) {
                 StringBuilder stringBuilder = new StringBuilder();
-
-                userObject.put("openId", unionId);
-                // TODO 登录待处理
-                ResultInfo resultInfo = null;// loginService.getUserInfoByOpenId(userObject);
-                if (resultInfo.getData() != null) {
-                    if (model.contains(AUTO_MODEL_MENU)) {
-                        stringBuilder.append(wechatProp.getCarManagerHtml());
-                    } else if (model.contains(ORDER_MODEL_MENU)) {
-                        stringBuilder.append(wechatProp.getOrderHtml());
-                    } else if (model.contains(FEEDBAKC_MODEL_MENU)) {
-                        stringBuilder.append(wechatProp.getFeedbackHtml());
-                    }
-                    stringBuilder.append("?openId=");
-                    stringBuilder.append(unionId);
-                } else {
-                    stringBuilder.append(wechatProp.getIndexHtml());
-                    stringBuilder.append("?openId=");
-                    stringBuilder.append(unionId);
-
-                    if (model.contains(ORDER_MODEL_MENU) || model.contains(FEEDBAKC_MODEL_MENU)) {
-                        stringBuilder.append("&model=");
-                        stringBuilder.append(model);
-                    }
-                }
-
+                stringBuilder.append(wechatProp.getIndexHtml());
+                Logger.info("index url is {}", stringBuilder.toString());
                 response.sendRedirect(stringBuilder.toString());
             }
         } else {
