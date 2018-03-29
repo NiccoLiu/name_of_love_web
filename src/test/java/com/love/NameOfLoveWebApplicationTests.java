@@ -2,7 +2,6 @@ package com.love;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -35,7 +34,7 @@ public class NameOfLoveWebApplicationTests {
     public void generate() {
 
         String accessToken = redisService.get("token");
-        if (StringUtils.isNotBlank(accessToken)) {
+        if (accessToken != null) {
             Token token = WechatHttpUtil.getToken(wechatProp.getTokenUrl(), wechatProp.getAppid(),
                     wechatProp.getAppsecret());
             accessToken = token.getAccessToken();
