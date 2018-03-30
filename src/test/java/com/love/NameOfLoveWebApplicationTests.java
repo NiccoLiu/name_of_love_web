@@ -1,5 +1,9 @@
 package com.love;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+
 import javax.annotation.Resource;
 
 import org.junit.Test;
@@ -14,6 +18,7 @@ import com.love.config.WechatProperties;
 import com.love.model.MenuUtil;
 import com.love.model.Token;
 import com.love.service.RedisService;
+import com.love.util.QRCodeUtil;
 import com.love.util.WechatHttpUtil;
 
 @RunWith(SpringRunner.class)
@@ -52,5 +57,18 @@ public class NameOfLoveWebApplicationTests {
             logger.info("菜单创建失败");
         }
 
+    }
+
+    // 生成二维码
+    @Test
+    public void testEncode() throws FileNotFoundException, Exception {
+        String dir = "C:/Users/Administrator/Desktop/1.jpg";
+        // String content =
+        // "https://iot.1000mob.com/cloud/api/scan/machine?corp=志高&model=DH_001&devsn=3423&module=123321";
+        // String content =
+        // "https://iot.1000mob.com/sharing/api/scan/machine?corp=志高&model=DH_001&devsn=3423&module=123321";
+        String content = "http://iot.1000mob.com/dev/config/menu/index";
+        File file = new File(dir);
+        QRCodeUtil.encode(content, null, new FileOutputStream(file), false);
     }
 }

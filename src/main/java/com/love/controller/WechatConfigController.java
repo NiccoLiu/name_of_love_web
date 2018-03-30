@@ -1,6 +1,7 @@
 package com.love.controller;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 
@@ -30,6 +31,7 @@ import com.love.model.ResultInfo;
 import com.love.service.ReceiverMessageService;
 import com.love.service.RedisService;
 import com.love.service.WechatConfigService;
+import com.love.util.QRCodeUtil;
 import com.love.util.SignUtil;
 import com.love.util.WechatHttpUtil;
 
@@ -152,7 +154,12 @@ public class WechatConfigController {
             Logger.info("get wechat user info is:{}", userObject);
 
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(wechatProp.getIndexHtml());
+            if ("recommond".equals(model)) {
+                stringBuilder.append("http://iot.1000mob.com/dev/config/menu/" + openId);
+            } else {
+                stringBuilder.append(wechatProp.getIndexHtml());
+            }
+
             Logger.info("index url is {}", stringBuilder.toString());
             response.sendRedirect(stringBuilder.toString());
         } else {
@@ -166,4 +173,19 @@ public class WechatConfigController {
         return wechatConfigService.getUserInfoByCode(jsonObject);
     }
 
+    @GetMapping("/generatorCode")
+    public void generatorCode(HttpServletRequest request, HttpServletResponse response) {
+        // String content = request.getQueryString();
+
+        response.setContentType("image/jpeg");
+        try {
+            OutputStream out = response.getOutputStream();
+            QRCodeUtil.encode("http://iot.1000mob.com/dev/config/menu/recommond", null, out, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 }

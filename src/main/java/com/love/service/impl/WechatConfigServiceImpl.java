@@ -48,7 +48,7 @@ public class WechatConfigServiceImpl implements WechatConfigService {
         String access_token = dataObject.getString("access_token");
         String openId = dataObject.getString("openid");
 
-        String userJson = WechatHttpUtil.requestUrl(wechatProp.getAppUserInfoUrl()
+        String userJson = WechatHttpUtil.requestUrl(wechatProp.getUserInfoUrl()
                 .replace("ACCESS_TOKEN", access_token).replace("OPENID", openId), "GET", null);
         JSONObject userObject = JSONObject.parseObject(userJson);
         LOGGER.info("get wechat user info is:{}", userObject);

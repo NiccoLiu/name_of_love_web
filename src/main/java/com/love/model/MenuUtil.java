@@ -45,7 +45,7 @@ public class MenuUtil {
         ViewButton btn2 = new ViewButton();
         btn2.setName("推广");
         btn2.setType("view");
-        btn2.setUrl("https://www.baidu.com");
+        btn2.setUrl("http://iot.1000mob.com/dev/config/generatorCode");
 
         ViewButton btn3 = new ViewButton();
         btn3.setName("我的");
