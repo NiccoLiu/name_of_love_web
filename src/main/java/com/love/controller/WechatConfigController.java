@@ -27,7 +27,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.love.config.WechatProperties;
 import com.love.exception.BizExceptionEnum;
 import com.love.exception.BussinessException;
+import com.love.mapper.UserDAO;
 import com.love.model.ResultInfo;
+import com.love.model.User;
 import com.love.service.ReceiverMessageService;
 import com.love.service.RedisService;
 import com.love.service.WechatConfigService;
@@ -64,6 +66,9 @@ public class WechatConfigController {
 
     @Autowired
     private RedisService redisService;
+
+    @Resource
+    private UserDAO userDao;
 
     @RequestMapping(method = RequestMethod.GET, value = "/sign")
     public void signature(HttpServletRequest request, HttpServletResponse response)
@@ -154,6 +159,14 @@ public class WechatConfigController {
             Logger.info("get wechat user info is:{}", userObject);
 
             StringBuilder stringBuilder = new StringBuilder();
+            User user = new User();
+            user.setOpenid(openId);
+            User userQuery = userDao.selectOne(user);
+            if (userQuery == null) {
+                user.setImageUrl(jsonObject.getString("headimgurl"));
+                user.setName(jsonObject.getString("nickname"));
+                userDao.insert(user);
+            }
             if ("recommond".equals(model)) {
                 stringBuilder.append("http://iot.1000mob.com/dev/config/menu/" + openId);
             } else {

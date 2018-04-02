@@ -1,15 +1,52 @@
 package com.love.service;
 
+
+import com.alibaba.fastjson.JSONObject;
+import com.love.model.ResultInfo;
 import com.love.model.User;
 
-import java.util.List;
-
 /**
- * Created by Administrator on 2018/3/17.
+ * :业务接口类
+ * 
+ * @author generator
  */
 public interface UserService {
-    public User getUserById(int userId);
-    boolean addUser(User record);
-    List<User> findAll();
-    void batchAddUser();
+
+    /**
+     * 新增
+     * 
+     * 
+     * @param params jsonstring from entity
+     * @return code and msg
+     */
+    ResultInfo add(JSONObject params);
+
+
+    /**
+     * 查询
+     * 
+     * 
+     * @param user jsonstring to entity
+     * @return code and entity json string
+     */
+    User query(User user);
+
+
+
+    /**
+     * 更新
+     * 
+     * @param user jsonstring to entity
+     * @return code and msg
+     */
+    ResultInfo update(User user);
+
+
+    /**
+     * 删除
+     * 
+     * @param params jsonstring from delete criteria
+     * @return code and msg
+     */
+    ResultInfo delete(JSONObject params);
 }

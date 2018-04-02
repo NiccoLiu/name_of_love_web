@@ -1,60 +1,94 @@
 package com.love.controller;
 
-import com.love.model.User;
-import com.love.service.UserService;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
+import com.alibaba.fastjson.JSONObject;
+import com.love.model.ResultInfo;
+import com.love.model.User;
+import com.love.service.UserService;
 
 /**
- * Created by Administrator on 2018/3/17.
+ * : Controller类
+ * 
+ * @author generator
  */
-@Controller
-@RequestMapping("/user")
+@RestController
+@RequestMapping(value = "/user")
 public class UserController {
-    @Resource
-    private UserService userService;
 
-    @RequestMapping("/showUser/{id}")
+
+    @Autowired
+    private UserService userServiceImpl;
+
+
+    /**
+     * 新增
+     * 
+     * 
+     * @param params jsonstring
+     * @return code and msg
+     */
+    @PostMapping("add")
     @ResponseBody
-    public User showUser(@PathVariable(value = "id") Integer id){
-        User user = this.userService.getUserById(id);
-        return user;
+    public ResultInfo add(@RequestBody JSONObject params) {
+        return userServiceImpl.add(params);
     }
 
-    @RequestMapping("/findAll")
+
+    /**
+     * 查询
+     * 
+     * 
+     * @param params jsonstring
+     * @return code and entity json string
+     */
+    @PostMapping("query")
     @ResponseBody
-    public List<User> findAll(HttpServletRequest request, Model model){
-        List<User> list = this.userService.findAll();
-        return list;
+    public ResultInfo query(@RequestBody JSONObject params) {
+        ResultInfo resultInfo = new ResultInfo(0, "success");
+        User paramEntity = params.toJavaObject(User.class);
+        User user = userServiceImpl.query(paramEntity);
+        resultInfo.setData(user);
+        return resultInfo;
     }
 
-    @RequestMapping("/insert")
-    @ResponseBody
-    public String insert(){
-        User u1 = new User("ls", "ls", 24);
-        User u2 = new User("ww", "ww", 25);
-        boolean flag = this.userService.addUser(u1);
 
-        flag = this.userService.addUser(u2);
-        return "save sucess";
+
+    /**
+     * 更新
+     * 
+     * 
+     * @param params jsonstring
+     * @return code and msg
+     */
+    @PostMapping("update")
+    @ResponseBody
+    public ResultInfo update(@RequestBody JSONObject params) {
+        User user = params.toJavaObject(User.class);
+        ResultInfo resultInfo = userServiceImpl.update(user);
+        return resultInfo;
     }
 
-    @RequestMapping("/batchInsert")
+
+    /**
+     * 删除
+     * 
+     * 
+     * @param params jsonstring
+     * @return code and msg
+     */
+    @PostMapping("delete")
     @ResponseBody
-    public String batchInsert(){
-        try {
-            this.userService.batchAddUser();
-            return "save sucess";
-        }catch (Exception e){
-            e.printStackTrace();
-            return "save failed";
-        }
+    public ResultInfo delete(@RequestBody JSONObject params) {
+        ResultInfo resultInfo = userServiceImpl.delete(params);
+        return resultInfo;
     }
+
+
 }

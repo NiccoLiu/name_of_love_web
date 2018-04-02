@@ -1,53 +1,63 @@
 package com.love.service.impl;
 
-import com.love.mapper.UserMapper;
-import com.love.model.User;
-import com.love.service.UserService;
-import org.springframework.stereotype.Service;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.alibaba.fastjson.JSONObject;
+import com.love.mapper.UserDAO;
+import com.love.model.ResultInfo;
+import com.love.model.User;
+import com.love.service.UserService;
 
 /**
- * Created by Administrator on 2018/3/17.
+ * :业务接口实现类
+ * 
+ * 
+ * @author generator
  */
-@Service("userService")
+@Service
+@Transactional
 public class UserServiceImpl implements UserService {
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
-    private UserMapper userMapper;
+    private UserDAO userDAO;
 
-
-    public User getUserById(int userId) {
-        return userMapper.selectByPrimaryKey(userId);
-    }
-
-    public boolean addUser(User record){
-        boolean result = false;
-        try {
-            userMapper.insert(record);
-            result = true;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result;
+    @Override
+    public ResultInfo add(JSONObject params) {
+        logger.debug("add User ,the params is {}", params);
+        ResultInfo resultInfo = new ResultInfo(0, "success");
+        User user = params.toJavaObject(User.class);
+        userDAO.insert(user);
+        return resultInfo;
     }
 
     @Override
-    public List<User> findAll() {
-        return userMapper.findAll();
+    public User query(User param) {
+        logger.debug("query User by {}", param);
+        User user = userDAO.selectOne(param);
+        return user;
     }
 
     @Override
-    @Transactional
-    public void batchAddUser() {
-        User u1 = new User("ls", "ls", 24);
-        User u2 = new User("ww", "ww", 25);
-        userMapper.insert(u1);
-        if(1==1)
-            throw new RuntimeException("操作失败");
-        userMapper.insert(u2);
+    public ResultInfo update(User user) {
+        logger.debug("update User ,the entity is {}", user);
+        ResultInfo resultInfo = new ResultInfo(0, "success");
+        userDAO.updateById(user);
+        return resultInfo;
+    }
+
+    @Override
+    public ResultInfo delete(JSONObject params) {
+        logger.debug("delete User by params {}", params);
+        Long id = params.getLong("id");
+        ResultInfo resultInfo = new ResultInfo(0, "success");
+        userDAO.deleteById(id);
+        return resultInfo;
     }
 
 }
