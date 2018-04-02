@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -16,7 +17,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.love.config.WechatProperties;
 import com.love.model.ResultInfo;
+import com.love.service.RedisService;
 import com.love.service.WeixinPayService;
+import com.love.util.WXPayConstants;
+import com.love.util.WXPayUtil;
 
 /**
  * 微信支付接口
@@ -29,10 +33,32 @@ public class WerxinPayServiceImpl implements WeixinPayService {
     private static final String TRADE_NO_PREFIX = "wxno";
     private static final String TOTALFEE_KEY = "totalAmount";
     private static final int EXPIRE_TIME_MINUTES = 10;
+
+    private static final String TRANSACTION_ID_KEY = "transaction_id";
+    private static final String THIRD_PAYMENT_NO_KEY = "third_trade_no";
+    private static final String OUT_TRADE_NO_KEY = "out_trade_no";
+    private static final String WX_RESULT_SUCCESS = "SUCCESS";
+    private static final String ORDER_TOTAL_FEE_KEY = "total_fee";
+
+    private static final String APP_KEY_PREFIX = "app.pay";
+    private static final String BANK_TYPE_KEY = "bank_type";
+    private static final String TIME_END_KEY = "time_end";
+
+    private static final String PAY_TYPE_KEY = "pay_type";
+    private static final int ALI_PAY_TYPE_VALUE = 1;
     @Resource
     WechatProperties wechatProp;
     @Resource
     WXPayImpl wxPayImpl;
+    @Resource
+    RedisService redisService;
+
+    private static class notifyInfo {
+        private static final String BACK_TO_WEIXIN_SUCCESSED_CODE = "SUCCESS";
+        private static final String BACK_TO_WEIXIN_FAILED_CODE = "ERROR";
+        private static final String BACK_TO_WEIXIN_SUCCESSED_MSG = "OK";
+        private static final String BACK_TO_WEIXIN_FAILED_MSG = "FAILED";
+    }
 
     @Override
     public ResultInfo payOrder(JSONObject params) {
@@ -49,7 +75,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             data.put("openid", openId);
             data.put("out_trade_no", wxTradeNo);// 商户订单号
             data.put("spbill_create_ip", "47.96.141.185");
-            data.put("notify_url", "http://iot.1000mob.com/dev/config/jssdk");
+            data.put("notify_url", "http://iot.1000mob.com/dev/wxpay/payback");
             data.put("trade_type", "JSAPI");
             data.put("fee_type", "CNY");
             // FIXME 测试阶段写死金额
@@ -63,6 +89,55 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             logger.error("wxpay order error ,the params is {}", params, e);
         }
         return result;
+    }
+
+    @Override
+    public String payBack(Map<String, String> responseData) throws Exception {
+        logger.debug("wxpay order notify data {}", responseData);
+        Map<String, String> data = new HashMap<String, String>();
+        data.put(WXPayConstants.WX_RETURN_CODE_KEY, notifyInfo.BACK_TO_WEIXIN_SUCCESSED_CODE);
+        data.put(WXPayConstants.WX_RESULT_MSG_KEY, notifyInfo.BACK_TO_WEIXIN_SUCCESSED_MSG);
+        if (WX_RESULT_SUCCESS.equals(responseData.get(WXPayConstants.WX_RETURN_CODE_KEY))) {
+            String redisKey = APP_KEY_PREFIX + responseData.get("out_trade_no");
+
+            String cachedStr = redisService.get(redisKey);
+            if (StringUtils.isEmpty(cachedStr)) {
+
+                logger.warn("wxpay order payback many times,notify data is {}", responseData);
+
+                return WXPayUtil.mapToXml(data);
+            }
+            JSONObject cachedData = JSONObject.parseObject(redisService.get(redisKey));
+            cachedData.put(THIRD_PAYMENT_NO_KEY, responseData.get(TRANSACTION_ID_KEY));
+            cachedData.put(BANK_TYPE_KEY, responseData.get(BANK_TYPE_KEY));
+            cachedData.put(TIME_END_KEY, responseData.get(TIME_END_KEY));
+            cachedData.put(PAY_TYPE_KEY, ALI_PAY_TYPE_VALUE);
+
+
+            String tradeNo = responseData.get(OUT_TRADE_NO_KEY);
+            // TODO 同步请求，可能会慢，导致微信支付结果通知异常等
+            // rechargeClient.recharge(cachedData);
+            String xml;
+            try {
+                xml = WXPayUtil.mapToXml(data);
+                logger.debug("wxpay order payback response xml is {}", xml);
+                // 删除缓存
+                redisService.del(redisKey);
+                return xml;
+            } catch (Exception e) {
+                logger.error("map to xml error", e);
+                data.put(WXPayConstants.WX_RETURN_CODE_KEY, notifyInfo.BACK_TO_WEIXIN_FAILED_CODE);
+                data.put(WXPayConstants.WX_RESULT_MSG_KEY, notifyInfo.BACK_TO_WEIXIN_FAILED_MSG);
+
+            }
+            // 获取缓存数据
+
+        }
+        data.put(WXPayConstants.WX_RETURN_CODE_KEY, notifyInfo.BACK_TO_WEIXIN_FAILED_CODE);
+        data.put(WXPayConstants.WX_RESULT_MSG_KEY, notifyInfo.BACK_TO_WEIXIN_FAILED_MSG);
+        String backToWeixinXml = WXPayUtil.mapToXml(data);
+        logger.debug("wxpay order notify error, response xml is {}", backToWeixinXml);
+        return backToWeixinXml;
     }
 
 }

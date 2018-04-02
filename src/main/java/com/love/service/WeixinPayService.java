@@ -1,5 +1,7 @@
 package com.love.service;
 
+import java.util.Map;
+
 import com.alibaba.fastjson.JSONObject;
 import com.love.model.ResultInfo;
 
@@ -16,6 +18,8 @@ public interface WeixinPayService {
      * @return APP支付SDK需要数据
      */
     ResultInfo payOrder(JSONObject params);
+
+    String payBack(Map<String, String> map) throws Exception;
 
 
 }
