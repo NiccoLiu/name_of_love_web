@@ -74,7 +74,13 @@ public class WerxinPayServiceImpl implements WeixinPayService {
         try {
             String wxTradeNo = TRADE_NO_PREFIX + IdWorker.getId();
             double totalFee = params.getDoubleValue(TOTALFEE_KEY);
-            String openId = params.getString("openid");
+            String sessionKey=params.getString("sessionKey");
+            String openId=redisService.get(sessionKey);
+            if (openId==null) {
+				result.setCode(-1);
+				result.setMsg("sessionKey不存在！");
+				return result;
+			}
             Date nowTime = new Date();
             String expireTime = DateFormatUtils
                     .format(DateUtils.addMinutes(nowTime, EXPIRE_TIME_MINUTES), "yyyMMddHHmmss");

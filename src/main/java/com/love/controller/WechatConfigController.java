@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletException;
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.security.MD5Encoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.love.config.WechatProperties;
 import com.love.exception.BizExceptionEnum;
 import com.love.exception.BussinessException;
@@ -38,9 +41,6 @@ import com.love.util.SignUtil;
 import com.love.util.WechatHttpUtil;
 
 /**
- * 
- * @author Jekin
- * @date 2017年8月3日下午4:28:10
  */
 @Controller
 @RequestMapping("/config")
@@ -113,8 +113,8 @@ public class WechatConfigController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/jssdk")
     @ResponseBody
-    public ResultInfo configJsskd() {
-        return wechatConfigService.configJssdk();
+    public ResultInfo configJsskd(@RequestBody JSONObject jsonObject) {
+        return wechatConfigService.configJssdk(jsonObject);
     }
 
     @GetMapping("/menu/{model}")
@@ -152,7 +152,13 @@ public class WechatConfigController {
             String accessToken = jsonObject.getString("access_token");
             String openId = jsonObject.getString("openid");
             Logger.info("accessToken is:{}, openId is:{}", accessToken, openId);
-
+            String sessionKey = null;
+			try {
+				sessionKey = MD5(openId);
+			} catch (Exception e) {
+				Logger.info("MD5 openId error:{}",e.getMessage());
+			}
+            redisService.set(sessionKey, openId);
             String userJson = WechatHttpUtil.requestUrl(wechatProp.getUserInfoUrl()
                     .replace("ACCESS_TOKEN", accessToken).replace("OPENID", openId), "GET", null);
             JSONObject userObject = JSONObject.parseObject(userJson);
@@ -171,7 +177,7 @@ public class WechatConfigController {
             if ("recommond".equals(model)) {
                 stringBuilder.append("http://iot.1000mob.com/dev/config/menu/" + openId);
             } else {
-                stringBuilder.append(wechatProp.getIndexHtml() + "?openId=" + openId);
+                stringBuilder.append(wechatProp.getIndexHtml() + "?sessionKey=" + sessionKey);
             }
 
             Logger.info("index url is {}", stringBuilder.toString());
@@ -201,5 +207,21 @@ public class WechatConfigController {
             e.printStackTrace();
         }
 
+    }
+    
+    /**
+     * 生成 MD5
+     *
+     * @param data 待处理数据
+     * @return MD5结果
+     */
+    public static String MD5(String data) throws Exception {
+        java.security.MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] array = md.digest(data.getBytes("UTF-8"));
+        StringBuilder sb = new StringBuilder();
+        for (byte item : array) {
+            sb.append(Integer.toHexString((item & 0xFF) | 0x100).substring(1, 3));
+        }
+        return sb.toString().toUpperCase();
     }
 }

@@ -5,7 +5,7 @@ import com.love.model.ResultInfo;
 
 public interface WechatConfigService {
 
-    ResultInfo configJssdk();
+    ResultInfo configJssdk(JSONObject jsonObject);
 
     ResultInfo getUserInfoByCode(JSONObject jsonObject);
 

@@ -1,6 +1,8 @@
 package com.love.controller;
 
 
+import javax.annotation.Resource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSONObject;
 import com.love.model.ResultInfo;
 import com.love.model.User;
+import com.love.service.RedisService;
 import com.love.service.UserService;
 
 /**
@@ -25,7 +28,8 @@ public class UserController {
 
     @Autowired
     private UserService userServiceImpl;
-
+@Resource
+private RedisService redisService;
 
     /**
      * 新增
@@ -53,6 +57,9 @@ public class UserController {
     public ResultInfo query(@RequestBody JSONObject params) {
         ResultInfo resultInfo = new ResultInfo(0, "success");
         User paramEntity = params.toJavaObject(User.class);
+        String sessionKey=params.getString("sessionKey");
+        String openId=redisService.get(sessionKey);
+        paramEntity.setOpenid(openId);
         User user = userServiceImpl.query(paramEntity);
         resultInfo.setData(user);
         return resultInfo;
