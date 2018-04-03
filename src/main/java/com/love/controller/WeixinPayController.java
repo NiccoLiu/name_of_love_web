@@ -48,7 +48,6 @@ public class WeixinPayController {
     @PostMapping("order")
     @ResponseBody
     public ResultInfo payOrder(@RequestBody JSONObject params) {
-        double totalFee = params.getDoubleValue(TOTALFEE_KEY);
         ResultInfo result = weixinPayService.payOrder(params);
         return result;
     }

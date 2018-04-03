@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.love.mapper.OrderDAO">
+	<!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id,amount,openid,serial_number as serialNumber,wechat_number as wechatNumber,bank_type as bankType,create_time as createTime,end_time as endTime,pay_result as payResult,pay_type as payType
+    </sql>
+	
+    <resultMap id="BaseResultMap" type="OrderDetail">
+		<id column="id" property="id" />
+		<result column="amount" property="amount" />
+		<result column="openid" property="openid" />
+		<result column="serial_number" property="serialNumber" />
+		<result column="wechat_number" property="wechatNumber" />
+		<result column="bank_type" property="bankType" />
+		<result column="create_time" property="createTime" />
+		<result column="end_time" property="endTime" />
+		<result column="pay_result" property="payResult" />
+		<result column="pay_type" property="payType" />
+    </resultMap>
+	
+	<select id="getOrderDetailPage" resultType="OrderDetail">
+        select <include refid="Base_Column_List" /> from order_detail where 1 = 1
+        <if test="orderDetail.payType != null">
+			and pay_type = #{orderDetail.payType}
+		</if>
+        <choose>
+            <when test="orderByField != null and orderByField !=''">
+                <choose>
+                    <when test="isAsc == true">
+                        order by ${orderByField} ASC
+                    </when>
+                    <otherwise>
+                        order by ${orderByField} DESC
+                    </otherwise>
+                </choose>
+            </when>
+            <otherwise>
+                order by id DESC
+            </otherwise>
+        </choose>
+    </select>
+	
+</mapper>

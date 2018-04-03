@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+    <contextName>logback</contextName>
+    <property name="log.path" value="logs/love_of_name.log" />
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>debug</level>
+        </filter>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36}.%M:%line - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}.%d{yyyy-MM-dd}.zip</fileNamePattern>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%date [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="console" />
+    </root>
+    <logger name="org.springframework"  level="error" />
+    <Logger name="com.netflix.discovery.DiscoveryClient" level="error" />
+    <Logger name="com.netflix.discovery.shared" level="error" />
+    <Logger name="org.apache.http" level="error" />
+    <logger name="org.mybatis" level="error" />
+    <logger name="com.netflix.loadbalancer" level="error" />
+</configuration>

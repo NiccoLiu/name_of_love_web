@@ -163,14 +163,15 @@ public class WechatConfigController {
             user.setOpenid(openId);
             User userQuery = userDao.selectOne(user);
             if (userQuery == null) {
-                user.setImageUrl(jsonObject.getString("headimgurl"));
-                user.setName(jsonObject.getString("nickname"));
+                user.setImageUrl(userObject.getString("headimgurl"));
+                user.setName(userObject.getString("nickname"));
+                user.setSource(model);
                 userDao.insert(user);
             }
             if ("recommond".equals(model)) {
                 stringBuilder.append("http://iot.1000mob.com/dev/config/menu/" + openId);
             } else {
-                stringBuilder.append(wechatProp.getIndexHtml());
+                stringBuilder.append(wechatProp.getIndexHtml() + "?openId=" + openId);
             }
 
             Logger.info("index url is {}", stringBuilder.toString());
