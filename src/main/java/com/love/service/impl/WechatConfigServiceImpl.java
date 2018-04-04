@@ -57,7 +57,8 @@ public class WechatConfigServiceImpl implements WechatConfigService {
     }
 
     @Override
-    public ResultInfo configJssdk() {
+    public ResultInfo configJssdk(JSONObject params) {
+    	String sessionKey=params.getString("sessionKey");
         ResultInfo resultInfo = new ResultInfo(0, "success");
 
         boolean isExit = redisService.exists("token");
@@ -101,7 +102,7 @@ public class WechatConfigServiceImpl implements WechatConfigService {
             sortedMap.put("noncestr", jsConfig.getNonceStr());
             sortedMap.put("jsapi_ticket", ticket);
             sortedMap.put("timestamp", jsConfig.getTimestamp());
-            sortedMap.put("url", wechatProp.getWebIndex());
+            sortedMap.put("url", wechatProp.getWebIndex()+"?sessionKey="+sessionKey);
             LOGGER.info("get sign map:{}", sortedMap);
             String sign = SHA1Util.sha1Sign(sortedMap);
             if (sign == null) {
