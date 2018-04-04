@@ -89,7 +89,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
         ResultInfo result = new ResultInfo(0, "success");
         try {
             String wxTradeNo = TRADE_NO_PREFIX + IdWorker.getId();
-            double totalFee = params.getDoubleValue(TOTALFEE_KEY)*100;
+            double totalFee = params.getDoubleValue(TOTALFEE_KEY);
             String sessionKey = params.getString("sessionKey");
             String openId = redisService.get(sessionKey);
             if (openId == null) {
@@ -192,6 +192,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             try {
                 orderDetail.setPayResult(1);
                 orderDetail.setBankType(responseData.get("bank_type"));
+                orderDetail.setWechatNumber(responseData.get("transaction_id"));
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
                 String endTime = responseData.get("time_end");
                 Date date = sdf.parse(endTime);
@@ -205,6 +206,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                 user.setOpenid(openId);
                 user = userService.selectOne(user);
                 user.setBalance(user.getBalance().add(balance));
+                user.setOldMember(1);
                 userService.update(user, new EntityWrapper<User>().eq("openid", openId));
                 xml = WXPayUtil.mapToXml(data);
                 logger.debug("wxpay order payback response xml is {}", xml);
