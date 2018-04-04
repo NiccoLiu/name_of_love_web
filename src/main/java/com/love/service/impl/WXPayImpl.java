@@ -66,9 +66,6 @@ public class WXPayImpl {
         if (!reqData.containsKey("mch_id")) {
             reqData.put("mch_id", wxPayProperties.getMchId());
         }
-        if (wxPayProperties.getPayMode() == 2) {
-            reqData.put("sub_mch_id", wxPayProperties.getSubMchId());
-        }
         if (!reqData.containsKey("appid")) {
             reqData.put("appid", wxPayProperties.getAppid());
         }
@@ -76,11 +73,11 @@ public class WXPayImpl {
         String mchKey = wxPayProperties.getMchKey();
         reqData.put("nonce_str", WXPayUtil.generateUUID());
 
-        if (SignType.MD5.equals(this.signType)) {
-            reqData.put("sign_type", WXPayConstants.MD5);
-        } else if (SignType.HMACSHA256.equals(this.signType)) {
-            reqData.put("sign_type", WXPayConstants.HMACSHA256);
-        }
+        /*
+         * if (SignType.MD5.equals(this.signType)) { reqData.put("sign_type", WXPayConstants.MD5); }
+         * else if (SignType.HMACSHA256.equals(this.signType)) { reqData.put("sign_type",
+         * WXPayConstants.HMACSHA256); }
+         */
         reqData.put("sign", WXPayUtil.generateSignature(reqData, mchKey, this.signType));
         return reqData;
     }

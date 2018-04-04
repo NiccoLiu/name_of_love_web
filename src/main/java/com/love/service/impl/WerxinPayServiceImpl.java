@@ -1,5 +1,6 @@
 package com.love.service.impl;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,6 +27,7 @@ import com.love.model.ResultInfo;
 import com.love.model.User;
 import com.love.service.RedisService;
 import com.love.service.WeixinPayService;
+import com.love.util.HttpKit;
 import com.love.util.WXPayConstants;
 import com.love.util.WXPayUtil;
 
@@ -78,27 +80,27 @@ public class WerxinPayServiceImpl implements WeixinPayService {
         try {
             String wxTradeNo = TRADE_NO_PREFIX + IdWorker.getId();
             double totalFee = params.getDoubleValue(TOTALFEE_KEY);
-            String sessionKey=params.getString("sessionKey");
-            String openId=redisService.get(sessionKey);
-            if (openId==null) {
-				result.setCode(-1);
-				result.setMsg("sessionKey不存在！");
-				return result;
-			}
+            String sessionKey = params.getString("sessionKey");
+            String openId = redisService.get(sessionKey);
+            if (openId == null) {
+                result.setCode(-1);
+                result.setMsg("sessionKey不存在！");
+                return result;
+            }
             Date nowTime = new Date();
             String expireTime = DateFormatUtils
                     .format(DateUtils.addMinutes(nowTime, EXPIRE_TIME_MINUTES), "yyyMMddHHmmss");
             HashMap<String, String> data = new HashMap<String, String>();
-            data.put("body", "以爱为名健康出行-会员充值");
+            data.put("body", "以爱为名 健康出行-会员充值");
             data.put("openid", openId);
             data.put("out_trade_no", wxTradeNo);// 商户订单号
-            data.put("spbill_create_ip", "47.96.141.185");
-            data.put("notify_url", "http://iot.1000mob.com/dev/wxpay/payback");
+            data.put("spbill_create_ip", HttpKit.getRequest().getRemoteAddr());
+            data.put("notify_url", wechatProp.getTemplateUrl() + File.separator + "wxpay/payback");
             data.put("trade_type", "JSAPI");
-            data.put("fee_type", "CNY");
+            // data.put("fee_type", "CNY");
             // FIXME 测试阶段写死金额
             data.put("total_fee", "1");// weixinPayModel.setTotalFee(1);
-            data.put("time_expire", expireTime);
+            // data.put("time_expire", expireTime);
             Map<String, String> responseData = null;
             redisService.set(wxTradeNo, data.toString(), APP_DATA_CACHED_ALIVE_TIME);
             responseData = wxPayImpl.unifiedOrder(data);

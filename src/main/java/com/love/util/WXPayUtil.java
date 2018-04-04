@@ -224,13 +224,12 @@ public class WXPayUtil {
         }
         sb.append("key=").append(key);
         LOGGER.info("get sign params is :{}", sb.toString());
-        if (SignType.MD5.equals(signType)) {
-            return MD5(sb.toString()).toUpperCase();
-        } else if (SignType.HMACSHA256.equals(signType)) {
-            return HMACSHA256(sb.toString(), key);
-        } else {
-            throw new Exception(String.format("Invalid sign_type: %s", signType));
-        }
+        return MD5(sb.toString()).toUpperCase();
+        /*
+         * if (SignType.MD5.equals(signType)) { return MD5(sb.toString()).toUpperCase(); } else if
+         * (SignType.HMACSHA256.equals(signType)) { return HMACSHA256(sb.toString(), key); } else {
+         * throw new Exception(String.format("Invalid sign_type: %s", signType)); }
+         */
     }
 
 
