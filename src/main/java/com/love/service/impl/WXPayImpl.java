@@ -50,7 +50,7 @@ public class WXPayImpl {
 
     public WXPayImpl(final String notifyUrl) throws Exception {
         this.notifyUrl = notifyUrl;
-        this.signType = SignType.MD5;
+        this.signType = SignType.HMACSHA256;
     }
 
     /**

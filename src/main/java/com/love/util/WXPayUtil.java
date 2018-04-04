@@ -224,7 +224,7 @@ public class WXPayUtil {
         }
         sb.append("key=").append(key);
         LOGGER.info("get sign params is :{}", sb.toString());
-        return MD5(sb.toString()).toUpperCase();
+        return HMACSHA256(sb.toString(), key);
         /*
          * if (SignType.MD5.equals(signType)) { return MD5(sb.toString()).toUpperCase(); } else if
          * (SignType.HMACSHA256.equals(signType)) { return HMACSHA256(sb.toString(), key); } else {

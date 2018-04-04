@@ -5,7 +5,12 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.annotation.Resource;
 
@@ -19,6 +24,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
+import com.love.config.WXPayProperties;
 import com.love.config.WechatProperties;
 import com.love.mapper.OrderDAO;
 import com.love.mapper.UserDAO;
@@ -29,6 +35,7 @@ import com.love.service.RedisService;
 import com.love.service.WeixinPayService;
 import com.love.util.HttpKit;
 import com.love.util.WXPayConstants;
+import com.love.util.WXPayConstants.SignType;
 import com.love.util.WXPayUtil;
 
 /**
@@ -56,8 +63,11 @@ public class WerxinPayServiceImpl implements WeixinPayService {
     private static final String PAY_TYPE_KEY = "pay_type";
     private static final int ALI_PAY_TYPE_VALUE = 1;
     private static final String PAYTIME_KEY = "pay_time";
+    private static final String PREPAY_ID = "prepay_id=";
     @Resource
     WechatProperties wechatProp;
+    @Resource
+    WXPayProperties wxPayProperties;
     @Resource
     WXPayImpl wxPayImpl;
     @Resource
@@ -104,6 +114,17 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             Map<String, String> responseData = null;
             redisService.set(wxTradeNo, data.toString(), APP_DATA_CACHED_ALIVE_TIME);
             responseData = wxPayImpl.unifiedOrder(data);
+            SortedMap<String, String> parameters = new TreeMap<String, String>();
+
+            String timestamp = "" + System.currentTimeMillis() / 1000;
+            parameters.put("appId", responseData.get("appid"));
+            parameters.put("timeStamp", timestamp);
+            parameters.put("nonceStr", responseData.get("nonce_str"));
+            parameters.put("package", PREPAY_ID + responseData.get("prepay_id"));
+            parameters.put("signType", SignType.HMACSHA256.toString());
+            String sign = paySign(parameters);
+            parameters.put("sign", sign);
+
             if ("SUCCESS".equals(responseData.get("return_code"))) {
                 OrderDetail order = new OrderDetail();
                 order.setOpenid(openId);
@@ -113,11 +134,35 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                 orderService.insert(order);
             }
             logger.info("result is {}", responseData);
-            result.setData(responseData);
+            result.setData(parameters);
         } catch (Exception e) {
             logger.error("wxpay order error ,the params is {}", params, e);
         }
         return result;
+    }
+
+    private String paySign(SortedMap<String, String> parameters) throws Exception {
+        StringBuffer sb = new StringBuffer();
+        Set<Entry<String, String>> es = parameters.entrySet();
+        Iterator<Entry<String, String>> it = es.iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, String> entry = (Map.Entry<String, String>) it.next();
+            String k = (String) entry.getKey();
+            String v = (String) entry.getValue();
+            if (!"sign".equals(k) && null != v && !"".equals(v)) {
+                sb.append(k);
+                sb.append("=");
+                sb.append(v);
+                sb.append("&");
+            }
+        }
+
+        sb.append("key=" + wxPayProperties.getMchKey());
+
+        String sign = WXPayUtil.HMACSHA256(sb.toString(), wxPayProperties.getMchKey());
+
+        logger.debug("parameters  is {} ,sign is {}", sb.toString(), sign);
+        return sign;
     }
 
     @Override
