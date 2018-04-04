@@ -60,4 +60,12 @@ public class UserServiceImpl implements UserService {
         return resultInfo;
     }
 
+    @Override
+    public ResultInfo shareInfo(JSONObject params) {
+        logger.debug("shareInfo User by params {}", params);
+        String sessionKey = params.getString("sessionKey");
+        ResultInfo resultInfo = new ResultInfo(0, "success");
+        return resultInfo;
+    }
+
 }

@@ -90,5 +90,19 @@ public class UserController {
         return resultInfo;
     }
 
+    /**
+     * 分享信息
+     * 
+     * 
+     * @param params jsonstring
+     * @return code and msg
+     */
+    @PostMapping("shareInfo")
+    @ResponseBody
+    public ResultInfo shareInfo(@RequestBody JSONObject params) {
+        ResultInfo resultInfo = userServiceImpl.shareInfo(params);
+        return resultInfo;
+    }
+
 
 }

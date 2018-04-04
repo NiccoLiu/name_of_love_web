@@ -49,4 +49,7 @@ public interface UserService {
      * @return code and msg
      */
     ResultInfo delete(JSONObject params);
+
+
+    ResultInfo shareInfo(JSONObject params);
 }

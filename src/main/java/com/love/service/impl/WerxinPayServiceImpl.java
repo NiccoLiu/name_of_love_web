@@ -20,8 +20,10 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.love.config.WechatProperties;
 import com.love.mapper.OrderDAO;
+import com.love.mapper.UserDAO;
 import com.love.model.OrderDetail;
 import com.love.model.ResultInfo;
+import com.love.model.User;
 import com.love.service.RedisService;
 import com.love.service.WeixinPayService;
 import com.love.util.WXPayConstants;
@@ -60,6 +62,8 @@ public class WerxinPayServiceImpl implements WeixinPayService {
     RedisService redisService;
     @Resource
     private OrderDAO orderService;
+    @Resource
+    private UserDAO userService;
 
     private static class notifyInfo {
         private static final String BACK_TO_WEIXIN_SUCCESSED_CODE = "SUCCESS";
@@ -116,6 +120,10 @@ public class WerxinPayServiceImpl implements WeixinPayService {
         data.put(WXPayConstants.WX_RESULT_MSG_KEY, notifyInfo.BACK_TO_WEIXIN_SUCCESSED_MSG);
         OrderDetail orderDetail = new OrderDetail();
         String redisKey = responseData.get("out_trade_no");
+        String openId = responseData.get("openid");
+        // 单位是分
+        String totalFee = responseData.get("total_fee");
+        BigDecimal balance = new BigDecimal(totalFee).divide(new BigDecimal("100"));
         if (WX_RESULT_SUCCESS.equals(responseData.get(WXPayConstants.WX_RETURN_CODE_KEY))) {
 
 
@@ -136,8 +144,16 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                 String endTime = responseData.get("time_end");
                 Date date = sdf.parse(endTime);
                 orderDetail.setEndTime(date);
+                // 修改订单表
                 orderService.update(orderDetail,
                         new EntityWrapper<OrderDetail>().eq("serial_number", tradeNo));
+
+                // 修改用户余额
+                User user = new User();
+                user.setOpenid(openId);
+                user = userService.selectOne(user);
+                user.setBalance(user.getBalance().add(balance));
+                userService.update(user, new EntityWrapper<User>().eq("openid", openId));
                 xml = WXPayUtil.mapToXml(data);
                 logger.debug("wxpay order payback response xml is {}", xml);
                 // 删除缓存
