@@ -1,6 +1,10 @@
 package com.love.service.impl;
 
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
+import com.love.config.WechatProperties;
 import com.love.mapper.UserDAO;
 import com.love.model.ResultInfo;
 import com.love.model.User;
@@ -26,6 +31,8 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserDAO userDAO;
+    @Autowired
+    private WechatProperties wechatProperties;
 
     @Override
     public ResultInfo add(JSONObject params) {
@@ -64,7 +71,12 @@ public class UserServiceImpl implements UserService {
     public ResultInfo shareInfo(JSONObject params) {
         logger.debug("shareInfo User by params {}", params);
         String sessionKey = params.getString("sessionKey");
+        Map<String, String> dataMap = new HashMap<>(3);
+        dataMap.put("url",
+                wechatProperties.getTemplateUrl() + File.separator + "config/menu/" + sessionKey);
+        dataMap.put("message", "今天我又领了10元现金");
         ResultInfo resultInfo = new ResultInfo(0, "success");
+        resultInfo.setData(dataMap);
         return resultInfo;
     }
 

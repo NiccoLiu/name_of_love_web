@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tomcat.util.security.MD5Encoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.love.config.WechatProperties;
 import com.love.exception.BizExceptionEnum;
 import com.love.exception.BussinessException;
@@ -153,11 +151,11 @@ public class WechatConfigController {
             String openId = jsonObject.getString("openid");
             Logger.info("accessToken is:{}, openId is:{}", accessToken, openId);
             String sessionKey = null;
-			try {
-				sessionKey = MD5(openId);
-			} catch (Exception e) {
-				Logger.info("MD5 openId error:{}",e.getMessage());
-			}
+            try {
+                sessionKey = MD5(openId);
+            } catch (Exception e) {
+                Logger.info("MD5 openId error:{}", e.getMessage());
+            }
             redisService.set(sessionKey, openId);
             String userJson = WechatHttpUtil.requestUrl(wechatProp.getUserInfoUrl()
                     .replace("ACCESS_TOKEN", accessToken).replace("OPENID", openId), "GET", null);
@@ -171,11 +169,11 @@ public class WechatConfigController {
             if (userQuery == null) {
                 user.setImageUrl(userObject.getString("headimgurl"));
                 user.setName(userObject.getString("nickname"));
-                user.setSource(model);
+                user.setSource(redisService.get(model));
                 userDao.insert(user);
             }
             if ("recommond".equals(model)) {
-                stringBuilder.append("http://iot.1000mob.com/dev/config/menu/" + openId);
+                stringBuilder.append("http://iot.1000mob.com/dev/config/menu/" + sessionKey);
             } else {
                 stringBuilder.append(wechatProp.getIndexHtml() + "?sessionKey=" + sessionKey);
             }
@@ -208,7 +206,7 @@ public class WechatConfigController {
         }
 
     }
-    
+
     /**
      * 生成 MD5
      *
