@@ -89,7 +89,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
         ResultInfo result = new ResultInfo(0, "success");
         try {
             String wxTradeNo = TRADE_NO_PREFIX + IdWorker.getId();
-            double totalFee = params.getDoubleValue(TOTALFEE_KEY);
+            double totalFee = params.getDoubleValue(TOTALFEE_KEY)*100;
             String sessionKey = params.getString("sessionKey");
             String openId = redisService.get(sessionKey);
             if (openId == null) {
@@ -108,7 +108,6 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             data.put("notify_url", wechatProp.getTemplateUrl() + File.separator + "wxpay/payback");
             data.put("trade_type", "JSAPI");
             // data.put("fee_type", "CNY");
-            // FIXME 测试阶段写死金额
             data.put("total_fee", "1");// weixinPayModel.setTotalFee(1);
             // data.put("time_expire", expireTime);
             Map<String, String> responseData = null;
@@ -121,7 +120,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             parameters.put("timeStamp", timestamp);
             parameters.put("nonceStr", responseData.get("nonce_str"));
             parameters.put("package", PREPAY_ID + responseData.get("prepay_id"));
-            parameters.put("signType", SignType.HMACSHA256.toString());
+            parameters.put("signType", WXPayConstants.HMACSHA256);
             String sign = paySign(parameters);
             parameters.put("sign", sign);
 
@@ -193,7 +192,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             try {
                 orderDetail.setPayResult(1);
                 orderDetail.setBankType(responseData.get("bank_type"));
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
                 String endTime = responseData.get("time_end");
                 Date date = sdf.parse(endTime);
                 orderDetail.setEndTime(date);
