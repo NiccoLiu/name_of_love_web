@@ -173,7 +173,14 @@ public class WechatConfigController {
                 userDao.insert(user);
             }
             if ("recommond".equals(model)) {
-                stringBuilder.append("http://iot.1000mob.com/dev/config/menu/" + sessionKey);
+                OutputStream out = response.getOutputStream();
+                try {
+                    QRCodeUtil.encode("http://iot.1000mob.com/dev/config/menu/" + sessionKey, null,
+                            out, true);
+                } catch (Exception e) {
+                    Logger.error(e.getMessage());
+                }
+                // stringBuilder.append();
             } else {
                 stringBuilder.append(wechatProp.getIndexHtml() + "?sessionKey=" + sessionKey);
             }
