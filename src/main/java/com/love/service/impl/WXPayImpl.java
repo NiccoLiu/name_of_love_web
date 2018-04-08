@@ -72,7 +72,7 @@ public class WXPayImpl {
 
         String mchKey = wxPayProperties.getMchKey();
         reqData.put("nonce_str", WXPayUtil.generateUUID());
-
+        reqData.put("sign_type",WXPayConstants.HMACSHA256);
         /*
          * if (SignType.MD5.equals(this.signType)) { reqData.put("sign_type", WXPayConstants.MD5); }
          * else if (SignType.HMACSHA256.equals(this.signType)) { reqData.put("sign_type",

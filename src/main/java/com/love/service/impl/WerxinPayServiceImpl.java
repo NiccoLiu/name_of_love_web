@@ -108,7 +108,6 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             data.put("notify_url", wechatProp.getTemplateUrl() + File.separator + "wxpay/payback");
             data.put("trade_type", "JSAPI");
             // data.put("fee_type", "CNY");
-            // FIXME 测试阶段写死金额
             data.put("total_fee", "1");// weixinPayModel.setTotalFee(1);
             // data.put("time_expire", expireTime);
             Map<String, String> responseData = null;
@@ -121,7 +120,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             parameters.put("timeStamp", timestamp);
             parameters.put("nonceStr", responseData.get("nonce_str"));
             parameters.put("package", PREPAY_ID + responseData.get("prepay_id"));
-            parameters.put("signType", SignType.HMACSHA256.toString());
+            parameters.put("signType", WXPayConstants.HMACSHA256);
             String sign = paySign(parameters);
             parameters.put("sign", sign);
 
@@ -193,7 +192,8 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             try {
                 orderDetail.setPayResult(1);
                 orderDetail.setBankType(responseData.get("bank_type"));
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                orderDetail.setWechatNumber(responseData.get("transaction_id"));
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
                 String endTime = responseData.get("time_end");
                 Date date = sdf.parse(endTime);
                 orderDetail.setEndTime(date);
@@ -206,6 +206,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                 user.setOpenid(openId);
                 user = userService.selectOne(user);
                 user.setBalance(user.getBalance().add(balance));
+                user.setOldMember(1);
                 userService.update(user, new EntityWrapper<User>().eq("openid", openId));
                 xml = WXPayUtil.mapToXml(data);
                 logger.debug("wxpay order payback response xml is {}", xml);
