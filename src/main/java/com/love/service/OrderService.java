@@ -2,6 +2,7 @@ package com.love.service;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.love.model.OrderDetail;
 import com.love.model.ResultInfo;
 
@@ -40,7 +41,7 @@ public interface OrderService {
      * @param order search criteria jsonstring to entity
      * @return code and dataList
      */
-    ResultInfo queryPage(OrderDetail order);
+    ResultInfo queryPage(Page<OrderDetail> page, OrderDetail order);
 
 
     /**

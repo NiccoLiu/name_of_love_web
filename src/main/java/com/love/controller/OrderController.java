@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.love.model.OrderDetail;
 import com.love.model.ResultInfo;
 import com.love.service.OrderService;
+import com.love.util.PageFactory;
 
 /**
  * : Controller类
@@ -70,9 +72,9 @@ public class OrderController {
     @ResponseBody
     public ResultInfo queryPage(@RequestBody JSONObject params) {
         ResultInfo resultInfo = new ResultInfo(0, "success");
-        // Page<OrderDetail> page = new PageFactory<OrderDetail>().defaultPage(params);
+        Page<OrderDetail> page = new PageFactory<OrderDetail>().defaultPage(params);
         OrderDetail order = JSONObject.parseObject(params.toJSONString(), OrderDetail.class);
-        resultInfo = orderServiceImpl.queryPage(order);
+        resultInfo = orderServiceImpl.queryPage(page, order);
         return resultInfo;
     }
 

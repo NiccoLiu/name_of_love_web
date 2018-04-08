@@ -11,12 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.love.dto.GridDTO;
 import com.love.mapper.OrderDAO;
 import com.love.model.OrderDetail;
 import com.love.model.ResultInfo;
 import com.love.service.OrderService;
-import com.love.util.PageFactory;
-import com.love.util.PageInfoBT;
 
 /**
  * :业务接口实现类
@@ -49,16 +48,16 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public ResultInfo queryPage(OrderDetail order) {
-        logger.debug("queryPage Order ,the entity is {}", order);
+    public ResultInfo queryPage(Page<OrderDetail> page, OrderDetail orderDetail) {
+        logger.debug("queryPage OrderDetail ,the entity is {},the page is {}", orderDetail, page);
         ResultInfo resultInfo = new ResultInfo(0, "success");
-        Page<OrderDetail> page = new PageFactory<OrderDetail>().defaultPage();
-
-        List<OrderDetail> result =
-                orderDAO.getOrderDetailPage(page, order, page.getOrderByField(), page.isAsc());
-        page.setRecords(result);
-        page.setTotal(page.getTotal());
-        resultInfo.setData(new PageInfoBT<>(page));
+        List<OrderDetail> result = orderDAO.getOrderDetailPage(page, orderDetail,
+                page.getOrderByField(), page.isAsc());
+        GridDTO<OrderDetail> grid = new GridDTO<OrderDetail>();
+        grid.setTotalRecord(page.getTotal());
+        grid.setTotalPage(page.getPages());
+        grid.setList(result);
+        resultInfo.setData(grid);
         return resultInfo;
     }
 

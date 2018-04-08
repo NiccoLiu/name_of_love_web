@@ -50,7 +50,7 @@ public class MenuUtil {
         ViewButton btn3 = new ViewButton();
         btn3.setName("我的");
         btn3.setType("view");
-        btn3.setUrl("https://www.baidu.com");
+        btn3.setUrl("http://iot.1000mob.com/dev/config/menu/index");
 
         Menu menu = new Menu();
         menu.setButton(new Button[] {btn1, btn2, btn3});

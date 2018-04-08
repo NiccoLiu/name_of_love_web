@@ -35,7 +35,6 @@ import com.love.service.RedisService;
 import com.love.service.WeixinPayService;
 import com.love.util.HttpKit;
 import com.love.util.WXPayConstants;
-import com.love.util.WXPayConstants.SignType;
 import com.love.util.WXPayUtil;
 
 /**
@@ -205,9 +204,26 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                 User user = new User();
                 user.setOpenid(openId);
                 user = userService.selectOne(user);
-                user.setBalance(user.getBalance().add(balance));
+                if (user.getOldMember() != 1 && user.getSource() != null
+                        && !"".equals(user.getSource())) {
+                    String resource = user.getSource();
+                    User resourceUser = new User();
+                    resourceUser.setOpenid(resource);
+                    resourceUser = userService.selectOne(user);
+                    if (resourceUser != null) {
+                        resourceUser
+                                .setBalance(resourceUser.getBalance().add(new BigDecimal("10")));
+                        resourceUser.setCashShare(
+                                resourceUser.getCashShare().add(new BigDecimal("10")));
+                        userService.update(resourceUser,
+                                new EntityWrapper<User>().eq("openid", resource));
+                    }
+
+                }
+                // user.setBalance(user.getBalance().add(balance));
                 user.setOldMember(1);
                 userService.update(user, new EntityWrapper<User>().eq("openid", openId));
+
                 xml = WXPayUtil.mapToXml(data);
                 logger.debug("wxpay order payback response xml is {}", xml);
                 // 删除缓存
