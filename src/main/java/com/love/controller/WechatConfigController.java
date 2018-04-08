@@ -169,7 +169,9 @@ public class WechatConfigController {
             if (userQuery == null) {
                 user.setImageUrl(userObject.getString("headimgurl"));
                 user.setName(userObject.getString("nickname"));
-                user.setSource(redisService.get(model));
+                if (!"index".equals(model)) {
+                    user.setSource(redisService.get(model));
+                }
                 userDao.insert(user);
             }
             if ("recommond".equals(model)) {
