@@ -21,5 +21,7 @@ public interface WeixinPayService {
 
     String payBack(Map<String, String> map) throws Exception;
 
+    ResultInfo withdrawals(JSONObject params);
+
 
 }

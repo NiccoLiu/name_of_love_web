@@ -15,8 +15,6 @@ import java.util.TreeMap;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -45,23 +43,11 @@ import com.love.util.WXPayUtil;
 @Service
 public class WerxinPayServiceImpl implements WeixinPayService {
     private static final Logger logger = LoggerFactory.getLogger(WerxinPayServiceImpl.class);
-    private static final String TRADE_NO_PREFIX = "wxno";
+    private static final String TRADE_NO_PREFIX = "love";
     private static final String TOTALFEE_KEY = "totalAmount";
-    private static final int EXPIRE_TIME_MINUTES = 10;
     private static final long APP_DATA_CACHED_ALIVE_TIME = 60 * 12;
-    private static final String TRANSACTION_ID_KEY = "transaction_id";
-    private static final String THIRD_PAYMENT_NO_KEY = "third_trade_no";
     private static final String OUT_TRADE_NO_KEY = "out_trade_no";
     private static final String WX_RESULT_SUCCESS = "SUCCESS";
-    private static final String ORDER_TOTAL_FEE_KEY = "total_fee";
-    private static final String ORDER_TOTAL_AMOUNT_KEY = "total_amount";
-    private static final String APP_KEY_PREFIX = "app.pay";
-    private static final String BANK_TYPE_KEY = "bank_type";
-    private static final String TIME_END_KEY = "time_end";
-    private static final String TRADENO_KEY = "outrade_no";
-    private static final String PAY_TYPE_KEY = "pay_type";
-    private static final int ALI_PAY_TYPE_VALUE = 1;
-    private static final String PAYTIME_KEY = "pay_time";
     private static final String PREPAY_ID = "prepay_id=";
     @Resource
     WechatProperties wechatProp;
@@ -96,9 +82,12 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                 result.setMsg("sessionKey不存在！");
                 return result;
             }
-            Date nowTime = new Date();
-            String expireTime = DateFormatUtils
-                    .format(DateUtils.addMinutes(nowTime, EXPIRE_TIME_MINUTES), "yyyMMddHHmmss");
+            /*
+             * Date nowTime = new Date();
+             * 
+             * String expireTime = DateFormatUtils .format(DateUtils.addMinutes(nowTime,
+             * EXPIRE_TIME_MINUTES), "yyyMMddHHmmss");
+             */
             HashMap<String, String> data = new HashMap<String, String>();
             data.put("body", "以爱为名 健康出行-会员充值");
             data.put("openid", openId);
@@ -173,8 +162,8 @@ public class WerxinPayServiceImpl implements WeixinPayService {
         String redisKey = responseData.get("out_trade_no");
         String openId = responseData.get("openid");
         // 单位是分
-        String totalFee = responseData.get("total_fee");
-        BigDecimal balance = new BigDecimal(totalFee).divide(new BigDecimal("100"));
+        // String totalFee = responseData.get("total_fee");
+        // BigDecimal balance = new BigDecimal(totalFee).divide(new BigDecimal("100"));
         if (WX_RESULT_SUCCESS.equals(responseData.get(WXPayConstants.WX_RETURN_CODE_KEY))) {
 
 
@@ -248,14 +237,57 @@ public class WerxinPayServiceImpl implements WeixinPayService {
         return backToWeixinXml;
     }
 
-    private void cacheOrderData(String wxTradeNo, double totalFee, Long userId) {
-        JSONObject cachedData = new JSONObject();
-        cachedData.put(ORDER_TOTAL_AMOUNT_KEY, totalFee);
-        cachedData.put(TRADENO_KEY, wxTradeNo);
-        Date payTime = new Date();
-        cachedData.put(PAYTIME_KEY, payTime);
 
-        String redisKey = APP_KEY_PREFIX + wxTradeNo;
-        redisService.set(redisKey, cachedData.toJSONString(), APP_DATA_CACHED_ALIVE_TIME);
+    @Override
+    public ResultInfo withdrawals(JSONObject params) {
+        ResultInfo result = new ResultInfo(0, "success");
+        try {
+            String wxTradeNo = TRADE_NO_PREFIX + IdWorker.getId();
+            double totalFee = params.getDoubleValue(TOTALFEE_KEY);
+
+            String sessionKey = params.getString("sessionKey");
+            String openId = redisService.get(sessionKey);
+            User user = new User();
+            user.setOpenid(openId);
+            user = userService.selectOne(user);
+            if (user.getBalance().doubleValue() < totalFee) {
+                result.setCode(-1);
+                result.setData("您的余额不足!");
+                return result;
+            }
+            if (openId == null) {
+                result.setCode(-1);
+                result.setMsg("sessionKey不存在！");
+                return result;
+            }
+            HashMap<String, String> data = new HashMap<String, String>();
+            data.put("check_name", "NO_CHECK");
+            data.put("openid", openId);
+            // 商户订单号
+            data.put("partner_trade_no", wxTradeNo);
+            BigDecimal amount = new BigDecimal(totalFee * 100);
+            data.put("amount", amount.toBigInteger() + "");
+            data.put("desc", "以爱为名 健康出行奖励提现");
+            data.put("spbill_create_ip", HttpKit.getRequest().getRemoteAddr());
+            Map<String, String> responseData = null;
+
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setOpenid(openId);
+            orderDetail.setPayType(2);
+            orderDetail.setAmount(new BigDecimal(totalFee));
+            // orderDetail.setEndTime(new Date());
+            orderDetail.setSerialNumber(wxTradeNo);
+            orderService.insert(orderDetail);
+            // orderDetail.setWechatNumber(responseData.get("payment_no"));
+            user.setBalance(user.getBalance().subtract(new BigDecimal(totalFee)));
+            userService.update(user, new EntityWrapper<User>().eq("openid", openId));
+            responseData = wxPayImpl.withdrawalsOrder(data);
+
+            logger.info("result is {}", responseData);
+            // result.setData(result);
+        } catch (Exception e) {
+            logger.error("wxpay withdrawals error ,the params is {}", params, e);
+        }
+        return result;
     }
 }

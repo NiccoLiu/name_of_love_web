@@ -72,7 +72,7 @@ public class WXPayImpl {
 
         String mchKey = wxPayProperties.getMchKey();
         reqData.put("nonce_str", WXPayUtil.generateUUID());
-        reqData.put("sign_type",WXPayConstants.HMACSHA256);
+        reqData.put("sign_type", WXPayConstants.HMACSHA256);
         /*
          * if (SignType.MD5.equals(this.signType)) { reqData.put("sign_type", WXPayConstants.MD5); }
          * else if (SignType.HMACSHA256.equals(this.signType)) { reqData.put("sign_type",
@@ -159,6 +159,9 @@ public class WXPayImpl {
         String msgUUID = reqData.get("nonce_str");
         String reqBody = WXPayUtil.mapToXml(reqData);
         String mchId = reqData.get("mch_id");
+        if (mchId == null) {
+            mchId = reqData.get("mchid");
+        }
         String resp = this.request(urlSuffix, msgUUID, reqBody, connectTimeoutMs, readTimeoutMs,
                 true, mchId);
         return resp;
@@ -727,5 +730,38 @@ public class WXPayImpl {
         throw exception;
     }
 
+    public Map<String, String> withdrawalsOrder(HashMap<String, String> reqData) throws Exception {
+        return this.withdrawalsOrder(reqData, wxPayProperties.getHttpConnectTimeoutMs(),
+                wxPayProperties.getHttpReadTimeoutMs());
+    }
+
+    private Map<String, String> withdrawalsOrder(HashMap<String, String> reqData,
+            int connectTimeoutMs, int readTimeoutMs) throws Exception {
+        String url = WXPayConstants.WITHDRAWALS_URL_SUFFIX;
+        String respXml = this.requestWithCert(url, this.fillWithdrawalsRequestData(reqData),
+                connectTimeoutMs, readTimeoutMs);
+        return this.processResponseXml(respXml);
+    }
+
+    private Map<String, String> fillWithdrawalsRequestData(HashMap<String, String> reqData)
+            throws Exception {
+        if (!reqData.containsKey("mchid")) {
+            reqData.put("mchid", wxPayProperties.getMchId());
+        }
+        if (!reqData.containsKey("mch_appid")) {
+            reqData.put("mch_appid", wxPayProperties.getAppid());
+        }
+
+        String mchKey = wxPayProperties.getMchKey();
+        reqData.put("nonce_str", WXPayUtil.generateUUID());
+        // reqData.put("sign_type", WXPayConstants.MD5);
+        /*
+         * if (SignType.MD5.equals(this.signType)) { reqData.put("sign_type", WXPayConstants.MD5); }
+         * else if (SignType.HMACSHA256.equals(this.signType)) { reqData.put("sign_type",
+         * WXPayConstants.HMACSHA256); }
+         */
+        reqData.put("sign", WXPayUtil.generateSignature(reqData, mchKey, SignType.MD5));
+        return reqData;
+    }
 
 }

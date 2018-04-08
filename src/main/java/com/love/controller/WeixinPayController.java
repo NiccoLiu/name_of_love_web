@@ -53,6 +53,20 @@ public class WeixinPayController {
     }
 
     /**
+     * 提现到零钱
+     * 
+     * @author liuxq
+     * @param params
+     * @return ResultInfo
+     */
+    @PostMapping("withdrawals")
+    @ResponseBody
+    public ResultInfo withdrawals(@RequestBody JSONObject params) {
+        ResultInfo result = weixinPayService.withdrawals(params);
+        return result;
+    }
+
+    /**
      * 微信支付通知处理
      * 
      * @param request
