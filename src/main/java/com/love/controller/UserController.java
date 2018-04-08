@@ -28,8 +28,8 @@ public class UserController {
 
     @Autowired
     private UserService userServiceImpl;
-@Resource
-private RedisService redisService;
+    @Resource
+    private RedisService redisService;
 
     /**
      * 新增
@@ -57,8 +57,8 @@ private RedisService redisService;
     public ResultInfo query(@RequestBody JSONObject params) {
         ResultInfo resultInfo = new ResultInfo(0, "success");
         User paramEntity = params.toJavaObject(User.class);
-        String sessionKey=params.getString("sessionKey");
-        String openId=redisService.get(sessionKey);
+        String sessionKey = params.getString("sessionKey");
+        String openId = redisService.get(sessionKey);
         paramEntity.setOpenid(openId);
         User user = userServiceImpl.query(paramEntity);
         resultInfo.setData(user);

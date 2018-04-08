@@ -196,8 +196,10 @@ public class WechatConfigController {
 
     @PostMapping("/oauth/getUserInfo")
     @ResponseBody
-    public ResultInfo getUserInfoByCode(@RequestBody JSONObject jsonObject) {
-        return wechatConfigService.getUserInfoByCode(jsonObject);
+    public ResultInfo getUserInfoByCode(HttpServletRequest request, HttpServletResponse response) {
+        String code = request.getParameter("code");
+        String model = request.getParameter("state");
+        return wechatConfigService.getUserInfoByCode(code, model);
     }
 
     @GetMapping("/generatorCode")

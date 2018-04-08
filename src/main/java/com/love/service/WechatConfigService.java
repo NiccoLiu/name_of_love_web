@@ -7,7 +7,7 @@ public interface WechatConfigService {
 
     ResultInfo configJssdk(JSONObject jsonObject);
 
-    ResultInfo getUserInfoByCode(JSONObject jsonObject);
+    ResultInfo getUserInfoByCode(String code, String model);
 
 
 }

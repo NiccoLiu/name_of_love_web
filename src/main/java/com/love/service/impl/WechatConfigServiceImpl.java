@@ -14,10 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 import com.love.config.WechatProperties;
+import com.love.mapper.UserDAO;
 import com.love.model.ResultInfo;
 import com.love.model.Token;
+import com.love.model.User;
 import com.love.model.wechatview.JssdkConfig;
 import com.love.service.RedisService;
+import com.love.service.UserService;
 import com.love.service.WechatConfigService;
 import com.love.util.SHA1Util;
 import com.love.util.WechatHttpUtil;
@@ -33,11 +36,14 @@ public class WechatConfigServiceImpl implements WechatConfigService {
 
     @Autowired
     RedisService redisService;
+    @Autowired
+    private UserService userServiceImpl;
+    @Resource
+    private UserDAO userDao;
 
     @Override
-    public ResultInfo getUserInfoByCode(JSONObject jsonObject) {
+    public ResultInfo getUserInfoByCode(String code, String model) {
         ResultInfo resultInfo = new ResultInfo(0, "success");
-        String code = jsonObject.getString("code");
 
         String dataString = WechatHttpUtil.requestUrl(
                 wechatProp.getOauthToken().replace("APPID", wechatProp.getAppid())
@@ -52,13 +58,24 @@ public class WechatConfigServiceImpl implements WechatConfigService {
                 .replace("ACCESS_TOKEN", access_token).replace("OPENID", openId), "GET", null);
         JSONObject userObject = JSONObject.parseObject(userJson);
         LOGGER.info("get wechat user info is:{}", userObject);
-        resultInfo.setData(userJson);
+        User paramEntity = new User();
+        paramEntity.setOpenid(openId);
+        User user = userServiceImpl.query(paramEntity);
+        if (user == null) {
+            user.setImageUrl(userObject.getString("headimgurl"));
+            user.setName(userObject.getString("nickname"));
+            if (!"index".equals(model)) {
+                user.setSource(redisService.get(model));
+            }
+            userDao.insert(user);
+        }
+        resultInfo.setData(user);
         return resultInfo;
     }
 
     @Override
     public ResultInfo configJssdk(JSONObject params) {
-    	String sessionKey=params.getString("sessionKey");
+        String sessionKey = params.getString("sessionKey");
         ResultInfo resultInfo = new ResultInfo(0, "success");
 
         boolean isExit = redisService.exists("token");
@@ -102,7 +119,7 @@ public class WechatConfigServiceImpl implements WechatConfigService {
             sortedMap.put("noncestr", jsConfig.getNonceStr());
             sortedMap.put("jsapi_ticket", ticket);
             sortedMap.put("timestamp", jsConfig.getTimestamp());
-            sortedMap.put("url", wechatProp.getWebIndex()+"?sessionKey="+sessionKey);
+            sortedMap.put("url", wechatProp.getWebIndex() + "?sessionKey=" + sessionKey);
             LOGGER.info("get sign map:{}", sortedMap);
             String sign = SHA1Util.sha1Sign(sortedMap);
             if (sign == null) {
