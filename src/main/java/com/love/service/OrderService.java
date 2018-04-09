@@ -60,4 +60,7 @@ public interface OrderService {
      * @return code and msg
      */
     ResultInfo delete(JSONObject params);
+
+
+    ResultInfo getAllCash(JSONObject params);
 }

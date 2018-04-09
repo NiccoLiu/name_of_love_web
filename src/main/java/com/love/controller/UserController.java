@@ -2,6 +2,7 @@ package com.love.controller;
 
 
 import java.io.File;
+import java.util.Date;
 
 import javax.annotation.Resource;
 
@@ -14,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
 import com.love.config.WechatProperties;
+import com.love.mapper.SignDAO;
 import com.love.model.ResultInfo;
+import com.love.model.Sign;
 import com.love.model.Token;
 import com.love.model.User;
 import com.love.service.RedisService;
@@ -37,6 +40,8 @@ public class UserController {
     private RedisService redisService;
     @Resource
     private WechatProperties wechatProp;
+    @Resource
+    private SignDAO signDAO;
 
     /**
      * 新增
@@ -82,7 +87,16 @@ public class UserController {
         user.setSubscribe(userObject.getInteger("subscribe"));
         JSONObject responseJson = (JSONObject) JSONObject.toJSON(user);
         // 是否签到 0 没有 1是
-        responseJson.put("isSign", 0);
+        Sign sign = new Sign();
+        sign.setOpenid(openId);
+        sign.setCreateTime(new Date());
+        Sign result = signDAO.findSign(sign);
+        if (result != null) {
+            responseJson.put("isSign", 1);
+        } else {
+            responseJson.put("isSign", 0);
+        }
+
         responseJson.put("url",
                 wechatProp.getTemplateUrl() + File.separator + "config/menu/" + sessionKey);
         responseJson.put("message", "今天我又领了10元现金");

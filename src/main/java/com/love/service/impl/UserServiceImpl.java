@@ -13,9 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 import com.love.config.WechatProperties;
+import com.love.mapper.SignDAO;
 import com.love.mapper.UserDAO;
 import com.love.model.ResultInfo;
+import com.love.model.Sign;
 import com.love.model.User;
+import com.love.service.RedisService;
 import com.love.service.UserService;
 
 /**
@@ -31,6 +34,10 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserDAO userDAO;
+    @Autowired
+    private SignDAO signDAO;
+    @Autowired
+    private RedisService redisService;
     @Autowired
     private WechatProperties wechatProperties;
 
@@ -71,6 +78,10 @@ public class UserServiceImpl implements UserService {
     public ResultInfo shareInfo(JSONObject params) {
         logger.debug("shareInfo User by params {}", params);
         String sessionKey = params.getString("sessionKey");
+        String openId = redisService.get(sessionKey);
+        Sign sign = new Sign();
+        sign.setOpenid(openId);
+        signDAO.insert(sign);
         Map<String, String> dataMap = new HashMap<>(3);
         dataMap.put("url",
                 wechatProperties.getTemplateUrl() + File.separator + "config/menu/" + sessionKey);

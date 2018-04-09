@@ -109,5 +109,19 @@ public class OrderController {
         return resultInfo;
     }
 
+    /**
+     * 总提现
+     * 
+     * 
+     * @param params jsonstring
+     * @return code and msg
+     */
+    @PostMapping("getAllCash")
+    @ResponseBody
+    public ResultInfo getAllCash(@RequestBody JSONObject params) {
+        ResultInfo resultInfo = orderServiceImpl.getAllCash(params);
+        return resultInfo;
+    }
+
 
 }

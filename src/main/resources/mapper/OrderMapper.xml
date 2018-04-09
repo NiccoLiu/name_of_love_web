@@ -40,5 +40,8 @@
             </otherwise>
         </choose>
     </select>
+	<select id="getAllCash" resultType="java.lang.Double">
+        SELECT IFNULL(SUM(amount),0) FROM order_detail WHERE pay_type=2 AND pay_result=1 AND openid=#{openId}
+    </select>
 	
 </mapper>

@@ -1,7 +1,9 @@
 package com.love.service.impl;
 
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,7 @@ import com.love.mapper.OrderDAO;
 import com.love.model.OrderDetail;
 import com.love.model.ResultInfo;
 import com.love.service.OrderService;
+import com.love.service.RedisService;
 
 /**
  * :业务接口实现类
@@ -30,6 +33,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderDAO orderDAO;
+    @Autowired
+    private RedisService redisService;
 
     @Override
     public ResultInfo add(JSONObject params) {
@@ -76,6 +81,19 @@ public class OrderServiceImpl implements OrderService {
         Long id = params.getLong("id");
         ResultInfo resultInfo = new ResultInfo(0, "success");
         orderDAO.deleteById(id);
+        return resultInfo;
+    }
+
+    @Override
+    public ResultInfo getAllCash(JSONObject params) {
+        ResultInfo resultInfo = new ResultInfo(0, "success");
+        logger.debug("getAllCash by params {}", params);
+        String sessionKey = params.getString("sessionKey");
+        String openId = redisService.get(sessionKey);
+        double money = orderDAO.getAllCash(openId);
+        Map<String, Object> map = new HashMap<>(2);
+        map.put("money", money);
+        resultInfo.setData(map);
         return resultInfo;
     }
 
