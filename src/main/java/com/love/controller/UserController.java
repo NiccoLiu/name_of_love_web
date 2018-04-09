@@ -1,6 +1,8 @@
 package com.love.controller;
 
 
+import java.io.File;
+
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +13,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
+import com.love.config.WechatProperties;
 import com.love.model.ResultInfo;
+import com.love.model.Token;
 import com.love.model.User;
 import com.love.service.RedisService;
 import com.love.service.UserService;
+import com.love.util.WechatHttpUtil;
 
 /**
  * : Controller类
@@ -30,6 +35,8 @@ public class UserController {
     private UserService userServiceImpl;
     @Resource
     private RedisService redisService;
+    @Resource
+    private WechatProperties wechatProp;
 
     /**
      * 新增
@@ -61,7 +68,25 @@ public class UserController {
         String openId = redisService.get(sessionKey);
         paramEntity.setOpenid(openId);
         User user = userServiceImpl.query(paramEntity);
-        resultInfo.setData(user);
+
+        String accessToken = redisService.get("token");
+        if (accessToken == null) {
+            Token token = WechatHttpUtil.getToken(wechatProp.getTokenUrl(), wechatProp.getAppid(),
+                    wechatProp.getAppsecret());
+            accessToken = token.getAccessToken();
+            redisService.set("token", accessToken, 4800);
+        }
+        String userJson = WechatHttpUtil.requestUrl(wechatProp.getUserInfoUrl1()
+                .replace("ACCESS_TOKEN", accessToken).replace("OPENID", openId), "GET", null);
+        JSONObject userObject = JSONObject.parseObject(userJson);
+        user.setSubscribe(userObject.getInteger("subscribe"));
+        JSONObject responseJson = (JSONObject) JSONObject.toJSON(user);
+        // 是否签到 0 没有 1是
+        responseJson.put("isSign", 0);
+        responseJson.put("url",
+                wechatProp.getTemplateUrl() + File.separator + "config/menu/" + sessionKey);
+        responseJson.put("message", "今天我又领了10元现金");
+        resultInfo.setData(responseJson);
         return resultInfo;
     }
 

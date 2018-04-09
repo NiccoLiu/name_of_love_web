@@ -84,6 +84,10 @@ public class User extends Model<User> {
      * 会员等级
      */
     private Integer grade;
+    /**
+     * 是否关注
+     */
+    private Integer subscribe;
     // columns END
 
     @Override
@@ -187,6 +191,14 @@ public class User extends Model<User> {
         this.grade = grade;
     }
 
+    public Integer getSubscribe() {
+        return subscribe;
+    }
+
+    public void setSubscribe(Integer subscribe) {
+        this.subscribe = subscribe;
+    }
+
     @Override
     public String toString() {
         String log = "";
@@ -202,6 +214,7 @@ public class User extends Model<User> {
         log += "[cashShare:" + getCashShare() + "]";
         log += "[createTime:" + getCreateTime() + "]";
         log += "[grade:" + getGrade() + "]";
+        log += "[subscribe:" + getSubscribe() + "]";
         return log;
     }
 }

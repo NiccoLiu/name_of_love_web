@@ -30,6 +30,7 @@ public class WechatProperties {
     private String appUserInfoUrl;
 
     private String userInfoUrl;
+    private String userInfoUrl1;
 
     private String snsapibaseUrl;
 
@@ -125,6 +126,14 @@ public class WechatProperties {
 
     public void setUserInfoUrl(String userInfoUrl) {
         this.userInfoUrl = userInfoUrl;
+    }
+
+    public String getUserInfoUrl1() {
+        return userInfoUrl1;
+    }
+
+    public void setUserInfoUrl1(String userInfoUrl1) {
+        this.userInfoUrl1 = userInfoUrl1;
     }
 
     public String getSnsapibaseUrl() {
