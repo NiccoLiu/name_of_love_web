@@ -274,6 +274,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOpenid(openId);
             orderDetail.setPayType(2);
+            orderDetail.setPayResult(1);
             orderDetail.setAmount(new BigDecimal(totalFee));
             // orderDetail.setEndTime(new Date());
             orderDetail.setSerialNumber(wxTradeNo);

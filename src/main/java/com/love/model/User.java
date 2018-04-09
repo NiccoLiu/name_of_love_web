@@ -28,6 +28,7 @@ public class User extends Model<User> {
      * 微信唯一标识
      */
     private String openid;
+    private String unionid;
 
     /**
      * 用户注册来源(判断推荐奖)
@@ -199,6 +200,14 @@ public class User extends Model<User> {
         this.subscribe = subscribe;
     }
 
+    public String getUnionid() {
+        return unionid;
+    }
+
+    public void setUnionid(String unionid) {
+        this.unionid = unionid;
+    }
+
     @Override
     public String toString() {
         String log = "";
@@ -215,6 +224,7 @@ public class User extends Model<User> {
         log += "[createTime:" + getCreateTime() + "]";
         log += "[grade:" + getGrade() + "]";
         log += "[subscribe:" + getSubscribe() + "]";
+        log += "[unionid:" + getUnionid() + "]";
         return log;
     }
 }

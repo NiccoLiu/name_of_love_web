@@ -20,9 +20,12 @@
     </resultMap>
 	
 	<select id="getOrderDetailPage" resultType="OrderDetail">
-        select <include refid="Base_Column_List" /> from order_detail where 1 = 1
+        select <include refid="Base_Column_List" /> from order_detail where 1 = 1 and pay_result = 1
         <if test="orderDetail.payType != null">
 			and pay_type = #{orderDetail.payType}
+		</if>
+        <if test="orderDetail.openid != null">
+			and openid = #{orderDetail.openid}
 		</if>
         <choose>
             <when test="orderByField != null and orderByField !=''">

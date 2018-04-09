@@ -1,18 +1,23 @@
 package com.love.service.impl;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import com.love.config.SmallRoutineProperties;
 import com.love.config.WechatProperties;
 import com.love.mapper.UserDAO;
 import com.love.model.ResultInfo;
@@ -22,6 +27,7 @@ import com.love.model.wechatview.JssdkConfig;
 import com.love.service.RedisService;
 import com.love.service.UserService;
 import com.love.service.WechatConfigService;
+import com.love.util.CommonUtil;
 import com.love.util.SHA1Util;
 import com.love.util.WechatHttpUtil;
 
@@ -30,9 +36,11 @@ import com.love.util.WechatHttpUtil;
 public class WechatConfigServiceImpl implements WechatConfigService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WechatConfigServiceImpl.class);
-
+    private static final String CAPCHA_NUMBER = "0123456789";
     @Resource
     WechatProperties wechatProp;
+    @Resource
+    private SmallRoutineProperties smallRoutineProperties;
 
     @Autowired
     RedisService redisService;
@@ -146,5 +154,60 @@ public class WechatConfigServiceImpl implements WechatConfigService {
         return token;
     }
 
+    @Override
+    public ResultInfo getSessionKey(String code) {
+        ResultInfo resultInfo = new ResultInfo();
+        Map<String, Object> map = new HashMap<String, Object>();
+        String WX_URL =
+                "https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code";
+        String WX_UNION_URL =
+                "https://api.weixin.qq.com/cgi-bin/user/info?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN";
+        try {
+            if (StringUtils.isBlank(code)) {
+                resultInfo.setMsg("Code为空!");
+            } else {
+                String requestUrl = WX_URL.replace("APPID", smallRoutineProperties.getAppid())
+                        .replace("SECRET", smallRoutineProperties.getAppsecret())
+                        .replace("JSCODE", code)
+                        .replace("authorization_code", "authorization_code");
+                LOGGER.info(requestUrl);
+                // 发起GET请求获取凭证
+                JSONObject jsonObject = CommonUtil.httpsRequest(requestUrl, "GET", null);
+                LOGGER.info("wechat getSessionKey response is {}", jsonObject);
+                if (jsonObject != null) {
+                    try {
+                        String openId = jsonObject.getString("openid");
+                        String sessionKey = jsonObject.getString("session_key");
+                        String unionId = jsonObject.getString("unionid");
+                        map.put("openid", openId);
+                        map.put("sessionkey", sessionKey);
+                        map.put("unionId", unionId);
+                        // 生成6位随机数
+                        StringBuffer rands = new StringBuffer();
+                        for (int i = 0; i < 6; i++) {
+                            int rand = (int) (Math.random() * 10);
+                            char str = CAPCHA_NUMBER.charAt(rand);
+                            rands.append(str + "");
+                        }
+                        String rdSession = rands.append(openId).toString();
 
+                        redisService.set(rdSession, JSONObject.toJSONString(map));
+                        LOGGER.info("rdSession in redis is {},the key is {}",
+                                redisService.get(rdSession), rdSession);
+                        Map<String, Object> mapSession = new HashMap<>(2);
+                        mapSession.put("rdSession", rdSession);
+
+                        resultInfo.setData(mapSession);
+                    } catch (JSONException e) {
+                        resultInfo.setMsg("code无效!");
+                    }
+                } else {
+                    resultInfo.setMsg("code无效!");
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        return resultInfo;
+    }
 }

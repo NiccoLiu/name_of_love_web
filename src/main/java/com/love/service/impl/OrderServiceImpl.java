@@ -15,8 +15,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.love.dto.GridDTO;
 import com.love.mapper.OrderDAO;
+import com.love.mapper.UserDAO;
 import com.love.model.OrderDetail;
 import com.love.model.ResultInfo;
+import com.love.model.User;
 import com.love.service.OrderService;
 import com.love.service.RedisService;
 
@@ -33,6 +35,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderDAO orderDAO;
+    @Autowired
+    private UserDAO userService;
     @Autowired
     private RedisService redisService;
 
@@ -91,8 +95,12 @@ public class OrderServiceImpl implements OrderService {
         String sessionKey = params.getString("sessionKey");
         String openId = redisService.get(sessionKey);
         double money = orderDAO.getAllCash(openId);
+        User user = new User();
+        user.setOpenid(openId);
+        user = userService.selectOne(user);
         Map<String, Object> map = new HashMap<>(2);
         map.put("money", money);
+        map.put("balance", user.getBalance());
         resultInfo.setData(map);
         return resultInfo;
     }

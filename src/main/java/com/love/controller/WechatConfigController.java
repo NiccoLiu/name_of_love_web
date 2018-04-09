@@ -168,11 +168,13 @@ public class WechatConfigController {
             if (userQuery == null) {
                 user.setImageUrl(userObject.getString("headimgurl"));
                 user.setName(userObject.getString("nickname"));
+                user.setUnionid(userObject.getString("unionid"));
                 if (!"index".equals(model)) {
                     user.setSource(redisService.get(model));
                 }
                 userDao.insert(user);
             } else {
+                userQuery.setUnionid(userObject.getString("unionid"));
                 userQuery.setImageUrl(userObject.getString("headimgurl"));
                 userQuery.setName(userObject.getString("nickname"));
                 userDao.updateById(userQuery);
@@ -236,5 +238,13 @@ public class WechatConfigController {
             sb.append(Integer.toHexString((item & 0xFF) | 0x100).substring(1, 3));
         }
         return sb.toString().toUpperCase();
+    }
+
+    @ResponseBody
+    @RequestMapping(method = RequestMethod.GET, value = "/getSessionKey")
+    public ResultInfo getSessionKey(HttpServletRequest request, HttpServletResponse response) {
+        String code = request.getHeader("X-WX-Code");
+        return wechatConfigService.getSessionKey(code);
+
     }
 }

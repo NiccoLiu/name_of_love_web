@@ -9,5 +9,7 @@ public interface WechatConfigService {
 
     ResultInfo getUserInfoByCode(String code, String model);
 
+    ResultInfo getSessionKey(String code);
+
 
 }

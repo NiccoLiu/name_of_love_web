@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.love.model.OrderDetail;
 import com.love.model.ResultInfo;
 import com.love.service.OrderService;
+import com.love.service.RedisService;
 import com.love.util.PageFactory;
 
 /**
@@ -27,6 +28,8 @@ public class OrderController {
 
     @Autowired
     private OrderService orderServiceImpl;
+    @Autowired
+    private RedisService redisService;
 
 
     /**
@@ -73,7 +76,9 @@ public class OrderController {
     public ResultInfo queryPage(@RequestBody JSONObject params) {
         ResultInfo resultInfo = new ResultInfo(0, "success");
         Page<OrderDetail> page = new PageFactory<OrderDetail>().defaultPage(params);
+        String openId = redisService.get(params.getString("sessionKey"));
         OrderDetail order = JSONObject.parseObject(params.toJSONString(), OrderDetail.class);
+        order.setOpenid(openId);
         resultInfo = orderServiceImpl.queryPage(page, order);
         return resultInfo;
     }
