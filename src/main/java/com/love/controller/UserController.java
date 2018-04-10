@@ -150,5 +150,19 @@ public class UserController {
         return resultInfo;
     }
 
+    /**
+     * 分享信息
+     * 
+     * 
+     * @param params jsonstring
+     * @return code and msg
+     */
+    @PostMapping("synchroStep")
+    @ResponseBody
+    public ResultInfo synchroStep(@RequestBody JSONObject params) {
+        ResultInfo resultInfo = userServiceImpl.synchroStep(params);
+        return resultInfo;
+    }
+
 
 }

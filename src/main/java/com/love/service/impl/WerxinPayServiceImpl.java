@@ -198,14 +198,15 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                     String resource = user.getSource();
                     User resourceUser = new User();
                     resourceUser.setOpenid(resource);
-                    resourceUser = userService.selectOne(user);
+                    resourceUser = userService.selectOne(resourceUser);
                     if (resourceUser != null) {
+                        resourceUser.setBalance(resourceUser.getBalance().add(new BigDecimal("2")));
                         resourceUser
-                                .setBalance(resourceUser.getBalance().add(new BigDecimal("10")));
-                        resourceUser.setCashShare(
-                                resourceUser.getCashShare().add(new BigDecimal("10")));
+                                .setCashShare(resourceUser.getCashShare().add(new BigDecimal("2")));
+                        resourceUser
+                                .setCashBack(resourceUser.getCashBack().add(new BigDecimal("2")));
                         userService.update(resourceUser,
-                                new EntityWrapper<User>().eq("source", resource));
+                                new EntityWrapper<User>().eq("openid", resource));
                     }
 
                 }

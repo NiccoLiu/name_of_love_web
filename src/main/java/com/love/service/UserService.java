@@ -52,4 +52,7 @@ public interface UserService {
 
 
     ResultInfo shareInfo(JSONObject params);
+
+
+    ResultInfo synchroStep(JSONObject params);
 }

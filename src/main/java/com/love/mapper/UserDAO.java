@@ -26,4 +26,6 @@ public interface UserDAO extends BaseMapper<User> {
      */
     List<User> getUserPage(@Param("page") Page<User> page, @Param("user") User user,
             @Param("orderByField") String orderByField, @Param("isAsc") boolean isAsc);
+
+    int updateStep(@Param("unionid") String unionid, @Param("step") long step);
 }

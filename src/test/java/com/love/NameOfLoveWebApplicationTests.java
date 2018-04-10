@@ -3,6 +3,9 @@ package com.love;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.annotation.Resource;
 
@@ -70,5 +73,22 @@ public class NameOfLoveWebApplicationTests {
         String content = "http://iot.1000mob.com/dev/config/menu/index";
         File file = new File(dir);
         QRCodeUtil.encode(content, null, new FileOutputStream(file), false);
+    }
+
+    @Test
+    public void testTimestamp() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+        Date date = new Date();
+        long test1 = date.getTime();
+        String time = simpleDateFormat.format(date);
+
+        long epoch = 0;
+        try {
+            epoch = simpleDateFormat.parse(time).getTime() / 1000;
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        System.out.println(test1 + "===============" + epoch);
     }
 }
