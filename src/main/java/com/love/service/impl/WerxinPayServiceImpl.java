@@ -205,7 +205,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                         resourceUser.setCashShare(
                                 resourceUser.getCashShare().add(new BigDecimal("10")));
                         userService.update(resourceUser,
-                                new EntityWrapper<User>().eq("openid", resource));
+                                new EntityWrapper<User>().eq("source", resource));
                     }
 
                 }

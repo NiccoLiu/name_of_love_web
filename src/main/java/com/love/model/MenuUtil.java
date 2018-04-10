@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 import com.love.model.wechatview.Button;
 import com.love.model.wechatview.Menu;
+import com.love.model.wechatview.Miniprogram;
 import com.love.model.wechatview.ViewButton;
 import com.love.util.WechatHttpUtil;
 
@@ -47,10 +48,16 @@ public class MenuUtil {
         btn2.setType("view");
         btn2.setUrl("http://iot.1000mob.com/dev/config/menu/recommond");
 
-        ViewButton btn3 = new ViewButton();
-        btn3.setName("我的");
-        btn3.setType("view");
-        btn3.setUrl("http://iot.1000mob.com/dev/config/menu/index");
+        /*
+         * ViewButton btn3 = new ViewButton(); btn3.setName("我的"); btn3.setType("view");
+         * btn3.setUrl("http://iot.1000mob.com/dev/config/menu/index");
+         */
+        Miniprogram btn3 = new Miniprogram();
+        btn3.setName("同步步数");
+        btn3.setType("miniprogram");
+        btn3.setUrl("http://mp.weixin.qq.com");
+        btn3.setAppid("wxce974c717afb16e9");
+        btn3.setPagepath("pages/lunar/index");
 
         Menu menu = new Menu();
         menu.setButton(new Button[] {btn1, btn2, btn3});
