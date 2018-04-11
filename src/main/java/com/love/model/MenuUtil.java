@@ -57,7 +57,7 @@ public class MenuUtil {
         btn3.setType("miniprogram");
         btn3.setUrl("http://mp.weixin.qq.com");
         btn3.setAppid("wxce974c717afb16e9");
-        btn3.setPagepath("pages/lunar/index");
+        btn3.setPagepath("pages/index/index");
 
         Menu menu = new Menu();
         menu.setButton(new Button[] {btn1, btn2, btn3});
