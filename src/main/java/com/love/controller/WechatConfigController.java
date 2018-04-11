@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 
 import javax.annotation.Resource;
@@ -167,7 +168,9 @@ public class WechatConfigController {
             User userQuery = userDao.selectOne(user);
             if (userQuery == null) {
                 user.setImageUrl(userObject.getString("headimgurl"));
-                user.setName(userObject.getString("nickname"));
+                String nickName = userObject.getString("nickname");
+                nickName = URLEncoder.encode(nickName, "utf-8");
+                user.setName(nickName);
                 user.setUnionid(userObject.getString("unionid"));
                 if (!"index".equals(model)) {
                     user.setSource(redisService.get(model));

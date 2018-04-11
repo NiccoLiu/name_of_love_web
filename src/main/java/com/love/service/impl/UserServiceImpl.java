@@ -3,6 +3,7 @@ package com.love.service.impl;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -104,6 +105,12 @@ public class UserServiceImpl implements UserService {
         Sign sign = new Sign();
         sign.setOpenid(openId);
         signDAO.insert(sign);
+        User user = new User();
+        user.setOpenid(openId);
+        user = userDAO.selectOne(user);
+        user.setBalance(user.getBalance().add(new BigDecimal("10")));
+        user.setCashBack(user.getCashBack().add(new BigDecimal("10")));
+        userDAO.updateById(user);
         Map<String, String> dataMap = new HashMap<>(3);
         dataMap.put("url",
                 wechatProperties.getTemplateUrl() + File.separator + "config/menu/" + sessionKey);

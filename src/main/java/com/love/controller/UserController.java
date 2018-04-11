@@ -2,10 +2,14 @@ package com.love.controller;
 
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Date;
 
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,7 +37,7 @@ import com.love.util.WechatHttpUtil;
 @RequestMapping(value = "/user")
 public class UserController {
 
-
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
     private UserService userServiceImpl;
     @Resource
@@ -73,7 +77,13 @@ public class UserController {
         String openId = redisService.get(sessionKey);
         paramEntity.setOpenid(openId);
         User user = userServiceImpl.query(paramEntity);
-
+        String nickName = user.getName();
+        try {
+            nickName = URLDecoder.decode(nickName, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            logger.error(e.getMessage());
+        }
+        user.setName(nickName);
         String accessToken = redisService.get("token");
         if (accessToken == null) {
             Token token = WechatHttpUtil.getToken(wechatProp.getTokenUrl(), wechatProp.getAppid(),

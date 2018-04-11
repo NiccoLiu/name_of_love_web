@@ -7,12 +7,14 @@ import java.awt.Image;
 import java.awt.Shape;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Hashtable;
 
 import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
@@ -147,7 +149,10 @@ public class QRCodeUtil {
     public static void encode(String content, String logoImgPath, OutputStream output,
             boolean needCompress) throws Exception {
         BufferedImage image = QRCodeUtil.createImage(content, logoImgPath, needCompress);
+        ByteArrayOutputStream bs = new ByteArrayOutputStream();
+        ImageOutputStream imOut = ImageIO.createImageOutputStream(bs);
         ImageIO.write(image, FORMAT_NAME, output);
+
     }
 
     /**

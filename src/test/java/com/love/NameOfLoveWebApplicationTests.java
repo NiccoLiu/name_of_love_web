@@ -73,6 +73,7 @@ public class NameOfLoveWebApplicationTests {
         String content = "http://iot.1000mob.com/dev/config/menu/index";
         File file = new File(dir);
         QRCodeUtil.encode(content, null, new FileOutputStream(file), false);
+
     }
 
     @Test
