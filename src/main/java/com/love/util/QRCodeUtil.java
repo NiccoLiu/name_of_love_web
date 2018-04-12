@@ -7,14 +7,20 @@ import java.awt.Image;
 import java.awt.Shape;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
+
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
@@ -30,6 +36,7 @@ import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 public class QRCodeUtil {
+    private static final Logger logger = LoggerFactory.getLogger(QRCodeUtil.class);
     private static final String CHARSET = "UTF-8";
     private static final String FORMAT_NAME = "JPG";
     // 二维码尺寸
@@ -151,8 +158,23 @@ public class QRCodeUtil {
         BufferedImage image = QRCodeUtil.createImage(content, logoImgPath, needCompress);
         ByteArrayOutputStream bs = new ByteArrayOutputStream();
         ImageOutputStream imOut = ImageIO.createImageOutputStream(bs);
-        ImageIO.write(image, FORMAT_NAME, output);
-
+        ImageIO.write(image, FORMAT_NAME, imOut);
+        InputStream in = new ByteArrayInputStream(bs.toByteArray());
+        byte[] data = null;
+        // 读取图片字节数组
+        try {
+            data = new byte[in.available()];
+            in.read(data);
+            in.close();
+        } catch (IOException e) {
+            return;
+        }
+        // String fileName=srcFile.getName();
+        // String
+        // prefix="data:image/jpg"+fileName.substring(fileName.lastIndexOf(".")+1)+";base64,";
+        String prefix = "data:image/jpg;base64,";
+        String test = prefix + Base64.encodeBase64String(data);// 返回Base64编码过的字节数组字符串
+        output.write(test.getBytes());
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.love.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -185,12 +186,13 @@ public class WechatConfigController {
 
             if ("recommond".equals(model)) {
                 OutputStream out = response.getOutputStream();
-                try {
-                    QRCodeUtil.encode("http://iot.1000mob.com/dev/config/menu/" + sessionKey, null,
-                            out, true);
-                } catch (Exception e) {
-                    Logger.error(e.getMessage());
-                }
+                String url = wechatProp.getTemplateUrl() + File.separator + "config/menu"
+                        + File.separator + sessionKey;
+                out.write(url.getBytes());
+                /*
+                 * try { QRCodeUtil.encode("http://iot.1000mob.com/dev/config/menu/" + sessionKey,
+                 * null, out, true); } catch (Exception e) { Logger.error(e.getMessage()); }
+                 */
                 // stringBuilder.append();
             } else {
                 stringBuilder.append(wechatProp.getIndexHtml() + "?sessionKey=" + sessionKey);
