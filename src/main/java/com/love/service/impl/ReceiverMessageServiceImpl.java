@@ -55,9 +55,10 @@ public class ReceiverMessageServiceImpl implements ReceiverMessageService {
             textMessage.setMsgType(Message.MESSAGE_TEXT);
             if (Message.MESSAGE_TEXT.equals(msgType)) {
                 if (isFirst) {
-                    isFirst = false;
+                    // isFirst = false;
                     textMessage.setContent(replyText());
                     respXml = textMessageToXml(textMessage);
+                    LOGGER.info(respXml);
                 } else {
                     respXml = "";
                 }
@@ -137,7 +138,7 @@ public class ReceiverMessageServiceImpl implements ReceiverMessageService {
      */
     public String replyText() {
         StringBuffer sb = new StringBuffer();
-        sb.append("正在为您接入客服，请稍候...或拨打客服电话：15974012112");
+        sb.append("正在为您接入客服，请稍候...或拨打客服电话：18073920866");
         return sb.toString();
     }
 
