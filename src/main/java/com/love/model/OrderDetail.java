@@ -75,6 +75,11 @@ public class OrderDetail extends Model<OrderDetail> {
      */
     @TableField(value = "pay_type")
     private Integer payType;
+
+    /**
+     * 返现金额
+     */
+    private java.math.BigDecimal cashback;
     // columns END
 
     @Override
@@ -162,6 +167,14 @@ public class OrderDetail extends Model<OrderDetail> {
         this.payType = payType;
     }
 
+    public java.math.BigDecimal getCashback() {
+        return cashback;
+    }
+
+    public void setCashback(java.math.BigDecimal cashback) {
+        this.cashback = cashback;
+    }
+
     @Override
     public String toString() {
         String log = "";
@@ -175,6 +188,7 @@ public class OrderDetail extends Model<OrderDetail> {
         log += "[endTime:" + getEndTime() + "]";
         log += "[payResult:" + getPayResult() + "]";
         log += "[payType:" + getPayType() + "]";
+        log += "[cashback:" + getCashback() + "]";
         return log;
     }
 }

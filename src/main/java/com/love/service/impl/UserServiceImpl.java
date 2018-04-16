@@ -16,6 +16,8 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.crypto.BadPaddingException;
@@ -36,8 +38,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.love.config.WechatProperties;
+import com.love.mapper.OrderDAO;
 import com.love.mapper.SignDAO;
 import com.love.mapper.UserDAO;
+import com.love.model.OrderDetail;
 import com.love.model.ResultInfo;
 import com.love.model.Sign;
 import com.love.model.User;
@@ -63,6 +67,9 @@ public class UserServiceImpl implements UserService {
     private RedisService redisService;
     @Autowired
     private WechatProperties wechatProperties;
+
+    @Autowired
+    private OrderDAO orderDAO;
 
     @Override
     public ResultInfo add(JSONObject params) {
@@ -104,14 +111,46 @@ public class UserServiceImpl implements UserService {
         String openId = redisService.get(sessionKey);
         Sign sign = new Sign();
         sign.setOpenid(openId);
-        signDAO.insert(sign);
+        sign.setCreateTime(new Date());
+        Sign result = signDAO.findSign(sign);
         User user = new User();
         user.setOpenid(openId);
         user = userDAO.selectOne(user);
-        user.setBalance(user.getBalance().add(new BigDecimal("10")));
-        user.setCashBack(user.getCashBack().add(new BigDecimal("10")));
-        user.setCashToday(user.getCashToday().add(new BigDecimal("10")));
-        userDAO.updateById(user);
+        if (result != null) {
+            Sign signNew = new Sign();
+            signNew.setOpenid(openId);
+            signDAO.insert(signNew);
+            Map<String, Object> columnMap = new HashMap<>(3);
+            columnMap.put("openid", openId);
+            columnMap.put("pay_type", 1);
+            List<OrderDetail> lists = orderDAO.selectByMap(columnMap);
+            BigDecimal tenDecimal = new BigDecimal("10");
+            BigDecimal fiveDecimal = new BigDecimal("5");
+            for (Iterator<OrderDetail> iterator = lists.iterator(); iterator.hasNext();) {
+                OrderDetail orderDetail = (OrderDetail) iterator.next();
+                int days = daysBetween(orderDetail.getCreateTime(), new Date());
+                BigDecimal cashBack = orderDetail.getCashback().add(tenDecimal);
+                BigDecimal cashFiveBack = orderDetail.getCashback().add(fiveDecimal);
+                if (days <= 90 && orderDetail.getAmount().doubleValue() >= cashBack.doubleValue()) {
+                    user.setBalance(user.getBalance().add(tenDecimal));
+                    user.setCashBack(user.getCashBack().add(tenDecimal));
+                    user.setCashToday(user.getCashToday().add(tenDecimal));
+                    userDAO.updateById(user);
+                    orderDetail.setCashback(cashBack);
+                    orderDAO.updateById(orderDetail);
+                } else if (days <= 180
+                        && orderDetail.getAmount().doubleValue() >= cashFiveBack.doubleValue()) {
+                    user.setBalance(user.getBalance().add(fiveDecimal));
+                    user.setCashBack(user.getCashBack().add(fiveDecimal));
+                    user.setCashToday(user.getCashToday().add(fiveDecimal));
+                    userDAO.updateById(user);
+                    orderDetail.setCashback(cashFiveBack);
+                    orderDAO.updateById(orderDetail);
+                }
+            }
+
+        }
+
         Map<String, String> dataMap = new HashMap<>(3);
         dataMap.put("url",
                 wechatProperties.getTemplateUrl() + File.separator + "config/menu/" + sessionKey);
@@ -216,5 +255,25 @@ public class UserServiceImpl implements UserService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static final int daysBetween(Date early, Date late) {
+
+        java.util.Calendar calst = java.util.Calendar.getInstance();
+        java.util.Calendar caled = java.util.Calendar.getInstance();
+        calst.setTime(early);
+        caled.setTime(late);
+        // 设置时间为0时
+        calst.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        calst.set(java.util.Calendar.MINUTE, 0);
+        calst.set(java.util.Calendar.SECOND, 0);
+        caled.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        caled.set(java.util.Calendar.MINUTE, 0);
+        caled.set(java.util.Calendar.SECOND, 0);
+        // 得到两个日期相差的天数
+        int days = ((int) (caled.getTime().getTime() / 1000)
+                - (int) (calst.getTime().getTime() / 1000)) / 3600 / 24;
+
+        return days;
     }
 }

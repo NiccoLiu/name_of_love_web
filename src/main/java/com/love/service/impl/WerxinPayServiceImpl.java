@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -61,6 +62,8 @@ public class WerxinPayServiceImpl implements WeixinPayService {
     private OrderDAO orderService;
     @Resource
     private UserDAO userService;
+    @Resource
+    private OrderDAO orderDAO;
 
     private static class notifyInfo {
         private static final String BACK_TO_WEIXIN_SUCCESSED_CODE = "SUCCESS";
@@ -200,15 +203,33 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                     resourceUser.setOpenid(resource);
                     resourceUser = userService.selectOne(resourceUser);
                     if (resourceUser != null) {
-                        resourceUser.setBalance(resourceUser.getBalance().add(new BigDecimal("2")));
-                        resourceUser
-                                .setCashToday(resourceUser.getCashToday().add(new BigDecimal("2")));
-                        resourceUser
-                                .setCashShare(resourceUser.getCashShare().add(new BigDecimal("2")));
-                        resourceUser
-                                .setCashBack(resourceUser.getCashBack().add(new BigDecimal("2")));
-                        userService.update(resourceUser,
-                                new EntityWrapper<User>().eq("openid", resource));
+                        Map<String, Object> columnMap = new HashMap<>(3);
+                        columnMap.put("openid", openId);
+                        columnMap.put("pay_type", 1);
+                        List<OrderDetail> lists = orderDAO.selectByMap(columnMap);
+                        BigDecimal twoDecimal = new BigDecimal("2");
+                        for (Iterator<OrderDetail> iterator = lists.iterator(); iterator
+                                .hasNext();) {
+                            OrderDetail orderDetail2 = (OrderDetail) iterator.next();
+                            BigDecimal cashBack = orderDetail2.getCashback().add(twoDecimal);
+                            int days = daysBetween(orderDetail2.getCreateTime(), new Date());
+                            if (days <= 180 && orderDetail2.getAmount().doubleValue() >= cashBack
+                                    .doubleValue()) {
+                                resourceUser.setBalance(resourceUser.getBalance().add(twoDecimal));
+                                resourceUser
+                                        .setCashToday(resourceUser.getCashToday().add(twoDecimal));
+                                resourceUser
+                                        .setCashShare(resourceUser.getCashShare().add(twoDecimal));
+                                resourceUser
+                                        .setCashBack(resourceUser.getCashBack().add(twoDecimal));
+                                userService.update(resourceUser,
+                                        new EntityWrapper<User>().eq("openid", resource));
+                                orderDetail2.setCashback(cashBack);
+                                orderDAO.updateById(orderDetail);
+                                break;
+                            }
+                        }
+
                     }
 
                 }
@@ -293,5 +314,25 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             logger.error("wxpay withdrawals error ,the params is {}", params, e);
         }
         return result;
+    }
+
+    public static final int daysBetween(Date early, Date late) {
+
+        java.util.Calendar calst = java.util.Calendar.getInstance();
+        java.util.Calendar caled = java.util.Calendar.getInstance();
+        calst.setTime(early);
+        caled.setTime(late);
+        // 设置时间为0时
+        calst.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        calst.set(java.util.Calendar.MINUTE, 0);
+        calst.set(java.util.Calendar.SECOND, 0);
+        caled.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        caled.set(java.util.Calendar.MINUTE, 0);
+        caled.set(java.util.Calendar.SECOND, 0);
+        // 得到两个日期相差的天数
+        int days = ((int) (caled.getTime().getTime() / 1000)
+                - (int) (calst.getTime().getTime() / 1000)) / 3600 / 24;
+
+        return days;
     }
 }
