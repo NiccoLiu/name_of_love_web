@@ -116,7 +116,7 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setOpenid(openId);
         user = userDAO.selectOne(user);
-        if (result != null) {
+        if (result == null) {
             Sign signNew = new Sign();
             signNew.setOpenid(openId);
             signDAO.insert(signNew);
