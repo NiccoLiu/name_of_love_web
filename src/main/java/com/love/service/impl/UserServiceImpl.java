@@ -110,11 +110,12 @@ public class UserServiceImpl implements UserService {
         user = userDAO.selectOne(user);
         user.setBalance(user.getBalance().add(new BigDecimal("10")));
         user.setCashBack(user.getCashBack().add(new BigDecimal("10")));
+        user.setCashToday(user.getCashToday().add(new BigDecimal("10")));
         userDAO.updateById(user);
         Map<String, String> dataMap = new HashMap<>(3);
         dataMap.put("url",
                 wechatProperties.getTemplateUrl() + File.separator + "config/menu/" + sessionKey);
-        dataMap.put("message", "今天我又领了10元现金");
+        dataMap.put("message", "今天我又领了" + user.getCashToday() + "元现金");
         ResultInfo resultInfo = new ResultInfo(0, "success");
         resultInfo.setData(dataMap);
         return resultInfo;

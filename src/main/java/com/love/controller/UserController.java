@@ -109,7 +109,7 @@ public class UserController {
 
         responseJson.put("url",
                 wechatProp.getTemplateUrl() + File.separator + "config/menu/" + sessionKey);
-        responseJson.put("message", "今天我又领了10元现金");
+        responseJson.put("message", "今天我又领了" + user.getCashToday() + "元现金");
         resultInfo.setData(responseJson);
         return resultInfo;
     }
@@ -161,7 +161,7 @@ public class UserController {
     }
 
     /**
-     * 分享信息
+     * 同步步数
      * 
      * 
      * @param params jsonstring

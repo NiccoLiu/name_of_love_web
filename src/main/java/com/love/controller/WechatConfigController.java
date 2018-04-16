@@ -185,10 +185,9 @@ public class WechatConfigController {
             }
 
             if ("recommond".equals(model)) {
-                OutputStream out = response.getOutputStream();
-                String url = wechatProp.getTemplateUrl() + File.separator + "config/menu"
-                        + File.separator + sessionKey;
-                out.write(url.getBytes());
+                // OutputStream out = response.getOutputStream();
+                stringBuilder.append(wechatProp.getTemplateUrl() + File.separator
+                        + "index.html?sessionKey=" + sessionKey + "#/share");
                 /*
                  * try { QRCodeUtil.encode("http://iot.1000mob.com/dev/config/menu/" + sessionKey,
                  * null, out, true); } catch (Exception e) { Logger.error(e.getMessage()); }

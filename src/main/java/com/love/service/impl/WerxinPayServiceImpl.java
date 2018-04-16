@@ -202,6 +202,8 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                     if (resourceUser != null) {
                         resourceUser.setBalance(resourceUser.getBalance().add(new BigDecimal("2")));
                         resourceUser
+                                .setCashToday(resourceUser.getCashToday().add(new BigDecimal("2")));
+                        resourceUser
                                 .setCashShare(resourceUser.getCashShare().add(new BigDecimal("2")));
                         resourceUser
                                 .setCashBack(resourceUser.getCashBack().add(new BigDecimal("2")));

@@ -44,9 +44,10 @@
 		</choose>
 	</select>
 	<update id="updateStep">
-		UPDATE USER SET step_number= #{step} WHERE 1=1
-		<if test="unionid !=null">
-		 and unionid= #{unionid}
-		</if>
+		UPDATE USER SET step_number= #{step} WHERE 1=1 and unionid= #{unionid}
 	</update>
+	<update id="updateZero">
+		UPDATE USER SET step_number= 0,cash_today= 0
+	</update>
+	
 </mapper>

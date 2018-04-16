@@ -89,6 +89,12 @@ public class User extends Model<User> {
      * 是否关注
      */
     private Integer subscribe;
+
+    /**
+     * 分享奖励
+     */
+    @TableField(value = "cash_today")
+    private java.math.BigDecimal cashToday;
     // columns END
 
     @Override
@@ -208,6 +214,14 @@ public class User extends Model<User> {
         this.unionid = unionid;
     }
 
+    public java.math.BigDecimal getCashToday() {
+        return cashToday;
+    }
+
+    public void setCashToday(java.math.BigDecimal cashToday) {
+        this.cashToday = cashToday;
+    }
+
     @Override
     public String toString() {
         String log = "";
@@ -225,6 +239,7 @@ public class User extends Model<User> {
         log += "[grade:" + getGrade() + "]";
         log += "[subscribe:" + getSubscribe() + "]";
         log += "[unionid:" + getUnionid() + "]";
+        log += "[cashToday:" + getCashToday() + "]";
         return log;
     }
 }

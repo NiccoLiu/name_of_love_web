@@ -17,7 +17,7 @@ public class UpdateUserStep {
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void doTask() {
-        int num = userDAO.updateStep(null, 0);
+        int num = userDAO.updateZero();
         logger.info("update user step num is {}", num);
     }
 }

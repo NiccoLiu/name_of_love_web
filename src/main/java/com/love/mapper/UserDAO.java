@@ -28,4 +28,6 @@ public interface UserDAO extends BaseMapper<User> {
             @Param("orderByField") String orderByField, @Param("isAsc") boolean isAsc);
 
     int updateStep(@Param("unionid") String unionid, @Param("step") long step);
+
+    int updateZero();
 }
