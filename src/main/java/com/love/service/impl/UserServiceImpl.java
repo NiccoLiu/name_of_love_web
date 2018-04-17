@@ -123,6 +123,7 @@ public class UserServiceImpl implements UserService {
             Map<String, Object> columnMap = new HashMap<>(3);
             columnMap.put("openid", openId);
             columnMap.put("pay_type", 1);
+            columnMap.put("pay_result", 1);
             List<OrderDetail> lists = orderDAO.selectByMap(columnMap);
             BigDecimal tenDecimal = new BigDecimal("10");
             BigDecimal fiveDecimal = new BigDecimal("5");

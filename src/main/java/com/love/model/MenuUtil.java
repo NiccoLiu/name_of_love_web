@@ -41,12 +41,12 @@ public class MenuUtil {
         ViewButton btn1 = new ViewButton();
         btn1.setName("首页");
         btn1.setType("view");
-        btn1.setUrl("http://iot.1000mob.com/dev/config/menu/index");
+        btn1.setUrl("http://www.yiaiweiming.com/dev/config/menu/index");
 
         ViewButton btn2 = new ViewButton();
         btn2.setName("推广");
         btn2.setType("view");
-        btn2.setUrl("http://iot.1000mob.com/dev/config/menu/recommond");
+        btn2.setUrl("http://www.yiaiweiming.com/dev/config/menu/recommond");
 
         /*
          * ViewButton btn3 = new ViewButton(); btn3.setName("我的"); btn3.setType("view");

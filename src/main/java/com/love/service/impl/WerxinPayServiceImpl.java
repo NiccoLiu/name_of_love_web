@@ -204,8 +204,9 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                     resourceUser = userService.selectOne(resourceUser);
                     if (resourceUser != null) {
                         Map<String, Object> columnMap = new HashMap<>(3);
-                        columnMap.put("openid", openId);
+                        columnMap.put("openid", resource);
                         columnMap.put("pay_type", 1);
+                        columnMap.put("pay_result", 1);
                         List<OrderDetail> lists = orderDAO.selectByMap(columnMap);
                         BigDecimal twoDecimal = new BigDecimal("2");
                         for (Iterator<OrderDetail> iterator = lists.iterator(); iterator
@@ -225,7 +226,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                                 userService.update(resourceUser,
                                         new EntityWrapper<User>().eq("openid", resource));
                                 orderDetail2.setCashback(cashBack);
-                                orderDAO.updateById(orderDetail);
+                                orderDAO.updateById(orderDetail2);
                                 break;
                             }
                         }
@@ -298,7 +299,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOpenid(openId);
             orderDetail.setPayType(2);
-            orderDetail.setPayResult(1);
+            orderDetail.setPayResult(0);
             orderDetail.setAmount(new BigDecimal(totalFee));
             // orderDetail.setEndTime(new Date());
             orderDetail.setSerialNumber(wxTradeNo);
