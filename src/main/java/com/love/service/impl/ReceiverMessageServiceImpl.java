@@ -41,7 +41,7 @@ public class ReceiverMessageServiceImpl implements ReceiverMessageService {
     @Override
     public String receiveMessage(HttpServletRequest request) {
         String respXml = null;
-
+        LOGGER.info("发送消息");
         try {
             Map<String, String> map = xmlToMap(request);
             String fromUserName = map.get("FromUserName");
