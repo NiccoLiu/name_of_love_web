@@ -127,32 +127,38 @@ public class UserServiceImpl implements UserService {
             List<OrderDetail> lists = orderDAO.selectByMap(columnMap);
             BigDecimal tenDecimal = new BigDecimal("10");
             BigDecimal fiveDecimal = new BigDecimal("5");
+            BigDecimal todayCash = user.getCashToday();
+            BigDecimal shareCash = user.getCashShare().subtract(todayCash);
             for (Iterator<OrderDetail> iterator = lists.iterator(); iterator.hasNext();) {
                 OrderDetail orderDetail = (OrderDetail) iterator.next();
                 int days = daysBetween(orderDetail.getCreateTime(), new Date());
-                BigDecimal cashBack = orderDetail.getCashback().add(tenDecimal);
-                BigDecimal cashFiveBack = orderDetail.getCashback().add(fiveDecimal);
-                if (days <= 90 && orderDetail.getAmount().doubleValue() >= cashBack.doubleValue()) {
-                    user.setBalance(user.getBalance().add(tenDecimal));
-                    user.setCashBack(user.getCashBack().add(tenDecimal));
-                    user.setCashToday(user.getCashToday().add(tenDecimal));
+                BigDecimal cashTenBack = orderDetail.getCashback().add(tenDecimal).add(shareCash);
+                BigDecimal cashFiveBack = orderDetail.getCashback().add(fiveDecimal).add(shareCash);
+                if (days <= 90
+                        && orderDetail.getAmount().doubleValue() >= cashTenBack.doubleValue()) {
+                    logger.info("tenDecimal is {}", tenDecimal.doubleValue());
+                    user.setBalance(user.getBalance().add(tenDecimal).add(shareCash));
+                    user.setCashBack(user.getCashBack().add(tenDecimal).add(shareCash));
+                    user.setCashToday(user.getCashToday().add(tenDecimal).add(shareCash));
                     userDAO.updateById(user);
-                    orderDetail.setCashback(cashBack);
+                    orderDetail.setCashback(cashTenBack);
                     orderDAO.updateById(orderDetail);
                 } else if (days <= 180
                         && orderDetail.getAmount().doubleValue() >= cashFiveBack.doubleValue()) {
-                    user.setBalance(user.getBalance().add(fiveDecimal));
-                    user.setCashBack(user.getCashBack().add(fiveDecimal));
-                    user.setCashToday(user.getCashToday().add(fiveDecimal));
+                    user.setBalance(user.getBalance().add(fiveDecimal).add(shareCash));
+                    user.setCashBack(user.getCashBack().add(fiveDecimal).add(shareCash));
+                    user.setCashToday(user.getCashToday().add(fiveDecimal).add(shareCash));
                     userDAO.updateById(user);
                     orderDetail.setCashback(cashFiveBack);
                     orderDAO.updateById(orderDetail);
                 }
+                shareCash = new BigDecimal("0");
             }
 
         }
 
         Map<String, String> dataMap = new HashMap<>(3);
+        dataMap.put("balance", user.getBalance().doubleValue() + "");
         dataMap.put("url",
                 wechatProperties.getTemplateUrl() + File.separator + "config/menu/" + sessionKey);
         dataMap.put("message", "今天我又领了" + user.getCashToday() + "元现金");

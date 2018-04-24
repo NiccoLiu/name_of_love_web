@@ -46,7 +46,8 @@ public class MenuUtil {
         ViewButton btn2 = new ViewButton();
         btn2.setName("推广");
         btn2.setType("view");
-        btn2.setUrl("http://www.yiaiweiming.com/dev/config/menu/recommond");
+        // btn2.setUrl("http://www.yiaiweiming.com/dev/config/menu/recommond");
+        btn2.setUrl("https://mp.weixin.qq.com/s/Mw9MNRyJX2DU-EX40yDn3Q");
 
         /*
          * ViewButton btn3 = new ViewButton(); btn3.setName("我的"); btn3.setType("view");

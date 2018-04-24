@@ -167,10 +167,10 @@ public class WechatConfigController {
             User user = new User();
             user.setOpenid(openId);
             User userQuery = userDao.selectOne(user);
+            String nickName = userObject.getString("nickname");
+            nickName = URLEncoder.encode(nickName, "utf-8");
             if (userQuery == null) {
                 user.setImageUrl(userObject.getString("headimgurl"));
-                String nickName = userObject.getString("nickname");
-                nickName = URLEncoder.encode(nickName, "utf-8");
                 user.setName(nickName);
                 user.setUnionid(userObject.getString("unionid"));
                 if (!"index".equals(model)) {
@@ -180,7 +180,7 @@ public class WechatConfigController {
             } else {
                 userQuery.setUnionid(userObject.getString("unionid"));
                 userQuery.setImageUrl(userObject.getString("headimgurl"));
-                userQuery.setName(userObject.getString("nickname"));
+                userQuery.setName(nickName);
                 userDao.updateById(userQuery);
             }
 
