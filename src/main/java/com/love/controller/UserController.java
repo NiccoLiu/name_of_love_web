@@ -174,5 +174,26 @@ public class UserController {
         return resultInfo;
     }
 
+    /**
+     * 绑定手机号码
+     * 
+     * @author liuxq
+     * @param params
+     * @return ResultInfo
+     */
+    @PostMapping("bindPhone")
+    @ResponseBody
+    public ResultInfo bindPhone(@RequestBody JSONObject params) {
+        ResultInfo resultInfo = userServiceImpl.bindPhone(params);
+        return resultInfo;
+    }
+
+    @PostMapping("findPhone")
+    @ResponseBody
+    public ResultInfo findPhone(@RequestBody JSONObject params) {
+        ResultInfo resultInfo = userServiceImpl.findPhone(params);
+        return resultInfo;
+    }
+
 
 }

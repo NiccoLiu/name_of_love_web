@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.love.config.WechatProperties;
 import com.love.mapper.OrderDAO;
 import com.love.mapper.SignDAO;
@@ -282,5 +283,50 @@ public class UserServiceImpl implements UserService {
                 - (int) (calst.getTime().getTime() / 1000)) / 3600 / 24;
 
         return days;
+    }
+
+    @Override
+    public ResultInfo bindPhone(JSONObject params) {
+        logger.debug("bindPhone by params {}", params);
+        ResultInfo resultInfo = new ResultInfo(0, "success");
+        String sessionKey = params.getString("sessionKey");
+        String phone = params.getString("phone");
+        String openId = redisService.get(sessionKey);
+        Map<String, Object> columnMap = new HashMap<>(2);
+        columnMap.put("phone", phone);
+        List<User> lists = userDAO.selectByMap(columnMap);
+        if (lists.size() > 0) {
+            resultInfo.setCode(-1);
+            resultInfo.setMsg("绑定失败,手机号码已存在!");
+            return resultInfo;
+        }
+        User user = new User();
+        user.setPhone(phone);
+        int num = userDAO.update(user, new EntityWrapper<User>().eq("openid", openId));
+        if (num > 0) {
+            resultInfo.setMsg("手机号码绑定成功!");
+        } else {
+            resultInfo.setCode(-1);
+            resultInfo.setMsg("绑定失败,请重试!");
+        }
+        return resultInfo;
+    }
+
+    @Override
+    public ResultInfo findPhone(JSONObject params) {
+        logger.debug("findPhone by params {}", params);
+        ResultInfo resultInfo = new ResultInfo(0, "success");
+        String phone = params.getString("phone");
+        Map<String, Object> columnMap = new HashMap<>(2);
+        columnMap.put("phone", phone);
+        List<User> lists = userDAO.selectByMap(columnMap);
+        if (lists.isEmpty()) {
+            resultInfo.setCode(-1);
+            resultInfo.setMsg("手机号码未绑定!");
+            return resultInfo;
+        } else {
+            resultInfo.setMsg("手机号码已绑定!");
+        }
+        return resultInfo;
     }
 }

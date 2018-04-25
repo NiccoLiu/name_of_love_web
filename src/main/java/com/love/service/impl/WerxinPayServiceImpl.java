@@ -79,6 +79,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             String wxTradeNo = TRADE_NO_PREFIX + IdWorker.getId();
             double totalFee = params.getDoubleValue(TOTALFEE_KEY);
             String sessionKey = params.getString("sessionKey");
+            String phone = params.getString("phone");
             String openId = redisService.get(sessionKey);
             if (openId == null) {
                 result.setCode(-1);
@@ -116,12 +117,31 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             parameters.put("sign", sign);
 
             if ("SUCCESS".equals(responseData.get("return_code"))) {
-                OrderDetail order = new OrderDetail();
-                order.setOpenid(openId);
-                order.setAmount(new BigDecimal(totalFee));
-                order.setPayType(1);
-                order.setSerialNumber(wxTradeNo);
-                orderService.insert(order);
+                if (phone != null && !"".equals(phone)) {
+                    User user = new User();
+                    user.setPhone(phone);
+                    User userNew = userService.selectOne(user);
+                    if (userNew == null) {
+                        result.setCode(-1);
+                        result.setMsg("手机号码不存在!");
+                        return result;
+                    }
+                    OrderDetail order = new OrderDetail();
+                    order.setOpenid(userNew.getOpenid());
+                    order.setAmount(new BigDecimal(totalFee));
+                    order.setPayType(1);
+                    order.setSerialNumber(wxTradeNo);
+                    order.setPayer(openId);
+                    orderService.insert(order);
+                } else {
+                    OrderDetail order = new OrderDetail();
+                    order.setOpenid(openId);
+                    order.setAmount(new BigDecimal(totalFee));
+                    order.setPayType(1);
+                    order.setSerialNumber(wxTradeNo);
+                    orderService.insert(order);
+                }
+
             }
             logger.info("result is {}", responseData);
             result.setData(parameters);
@@ -192,9 +212,12 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                 orderService.update(orderDetail,
                         new EntityWrapper<OrderDetail>().eq("serial_number", tradeNo));
 
+                OrderDetail orderDetailNew = new OrderDetail();
+                orderDetailNew.setSerialNumber(tradeNo);
+                orderDetailNew = orderService.selectOne(orderDetailNew);
                 // 修改用户余额
                 User user = new User();
-                user.setOpenid(openId);
+                user.setOpenid(orderDetailNew.getOpenid());
                 user = userService.selectOne(user);
                 if (user.getOldMember() != 1 && user.getSource() != null
                         && !"".equals(user.getSource())) {
@@ -236,7 +259,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                 }
                 // user.setBalance(user.getBalance().add(balance));
                 user.setOldMember(1);
-                userService.update(user, new EntityWrapper<User>().eq("openid", openId));
+                userService.update(user, new EntityWrapper<User>().eq("openid", user.getOpenid()));
 
                 xml = WXPayUtil.mapToXml(data);
                 logger.debug("wxpay order payback response xml is {}", xml);

@@ -80,6 +80,10 @@ public class OrderDetail extends Model<OrderDetail> {
      * 返现金额
      */
     private java.math.BigDecimal cashback;
+    /**
+     * 付款人
+     */
+    private String payer;
     // columns END
 
     @Override
@@ -175,6 +179,14 @@ public class OrderDetail extends Model<OrderDetail> {
         this.cashback = cashback;
     }
 
+    public String getPayer() {
+        return payer;
+    }
+
+    public void setPayer(String payer) {
+        this.payer = payer;
+    }
+
     @Override
     public String toString() {
         String log = "";
@@ -189,6 +201,7 @@ public class OrderDetail extends Model<OrderDetail> {
         log += "[payResult:" + getPayResult() + "]";
         log += "[payType:" + getPayType() + "]";
         log += "[cashback:" + getCashback() + "]";
+        log += "[payer:" + getPayer() + "]";
         return log;
     }
 }

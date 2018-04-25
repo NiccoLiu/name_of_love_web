@@ -95,6 +95,8 @@ public class User extends Model<User> {
      */
     @TableField(value = "cash_today")
     private java.math.BigDecimal cashToday;
+
+    private String phone;
     // columns END
 
     @Override
@@ -222,6 +224,14 @@ public class User extends Model<User> {
         this.cashToday = cashToday;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     @Override
     public String toString() {
         String log = "";
@@ -240,6 +250,7 @@ public class User extends Model<User> {
         log += "[subscribe:" + getSubscribe() + "]";
         log += "[unionid:" + getUnionid() + "]";
         log += "[cashToday:" + getCashToday() + "]";
+        log += "[phone:" + getPhone() + "]";
         return log;
     }
 }

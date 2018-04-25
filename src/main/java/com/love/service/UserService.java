@@ -55,4 +55,10 @@ public interface UserService {
 
 
     ResultInfo synchroStep(JSONObject params);
+
+
+    ResultInfo bindPhone(JSONObject params);
+
+
+    ResultInfo findPhone(JSONObject params);
 }

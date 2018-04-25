@@ -5,7 +5,7 @@
 	<sql id="Base_Column_List">
 		id,openid,source,balance,name,image_url as imageUrl,old_member as oldMember,step_number as
 		stepNumber,cash_back as cashBack,cash_share as cashShare,create_time
-		as createTime,grade
+		as createTime,grade,phone
 	</sql>
 
 	<resultMap id="BaseResultMap" type="User">
