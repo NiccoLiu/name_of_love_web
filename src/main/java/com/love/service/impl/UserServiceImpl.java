@@ -325,6 +325,7 @@ public class UserServiceImpl implements UserService {
             resultInfo.setMsg("手机号码未绑定!");
             return resultInfo;
         } else {
+            resultInfo.setData(lists.get(0));
             resultInfo.setMsg("手机号码已绑定!");
         }
         return resultInfo;
