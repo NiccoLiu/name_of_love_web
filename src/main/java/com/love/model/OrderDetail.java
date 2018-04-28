@@ -84,6 +84,10 @@ public class OrderDetail extends Model<OrderDetail> {
      * 付款人
      */
     private String payer;
+    /**
+     * 手机号码
+     */
+    private String phone;
     // columns END
 
     @Override
@@ -187,6 +191,14 @@ public class OrderDetail extends Model<OrderDetail> {
         this.payer = payer;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     @Override
     public String toString() {
         String log = "";
@@ -202,6 +214,7 @@ public class OrderDetail extends Model<OrderDetail> {
         log += "[payType:" + getPayType() + "]";
         log += "[cashback:" + getCashback() + "]";
         log += "[payer:" + getPayer() + "]";
+        log += "[phone:" + getPhone() + "]";
         return log;
     }
 }

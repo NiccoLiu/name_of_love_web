@@ -125,7 +125,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                     if (userNew != null) {
                         order.setOpenid(userNew.getOpenid());
                     }
-
+                    order.setPhone(phone);
                     order.setAmount(new BigDecimal(totalFee));
                     order.setPayType(1);
                     order.setSerialNumber(wxTradeNo);
