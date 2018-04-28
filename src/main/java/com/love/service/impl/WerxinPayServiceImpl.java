@@ -213,52 +213,55 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                 OrderDetail orderDetailNew = new OrderDetail();
                 orderDetailNew.setSerialNumber(tradeNo);
                 orderDetailNew = orderService.selectOne(orderDetailNew);
-                // 修改用户余额
-                User user = new User();
-                user.setOpenid(orderDetailNew.getOpenid());
-                user = userService.selectOne(user);
-                if (user.getOldMember() != 1 && user.getSource() != null
-                        && !"".equals(user.getSource())) {
-                    String resource = user.getSource();
-                    User resourceUser = new User();
-                    resourceUser.setOpenid(resource);
-                    resourceUser = userService.selectOne(resourceUser);
-                    if (resourceUser != null) {
-                        Map<String, Object> columnMap = new HashMap<>(3);
-                        columnMap.put("openid", resource);
-                        columnMap.put("pay_type", 1);
-                        columnMap.put("pay_result", 1);
-                        List<OrderDetail> lists = orderDAO.selectByMap(columnMap);
-                        BigDecimal twoDecimal = new BigDecimal("2");
-                        for (Iterator<OrderDetail> iterator = lists.iterator(); iterator
-                                .hasNext();) {
-                            OrderDetail orderDetail2 = (OrderDetail) iterator.next();
-                            BigDecimal cashBack = orderDetail2.getCashback().add(twoDecimal);
-                            int days = daysBetween(orderDetail2.getCreateTime(), new Date());
-                            if (days <= 180 && orderDetail2.getAmount().doubleValue() >= cashBack
-                                    .doubleValue()) {
-                                resourceUser.setBalance(resourceUser.getBalance().add(twoDecimal));
-                                resourceUser
-                                        .setCashToday(resourceUser.getCashToday().add(twoDecimal));
-                                resourceUser
-                                        .setCashShare(resourceUser.getCashShare().add(twoDecimal));
-                                resourceUser
-                                        .setCashBack(resourceUser.getCashBack().add(twoDecimal));
-                                userService.update(resourceUser,
-                                        new EntityWrapper<User>().eq("openid", resource));
-                                orderDetail2.setCashback(cashBack);
-                                orderDAO.updateById(orderDetail2);
-                                break;
+                if (orderDetailNew.getOpenid() != null || !"".equals(orderDetailNew.getOpenid())) {
+                    // 修改用户余额
+                    User user = new User();
+                    user.setOpenid(orderDetailNew.getOpenid());
+                    user = userService.selectOne(user);
+                    if (user.getOldMember() != 1 && user.getSource() != null
+                            && !"".equals(user.getSource())) {
+                        String resource = user.getSource();
+                        User resourceUser = new User();
+                        resourceUser.setOpenid(resource);
+                        resourceUser = userService.selectOne(resourceUser);
+                        if (resourceUser != null) {
+                            Map<String, Object> columnMap = new HashMap<>(3);
+                            columnMap.put("openid", resource);
+                            columnMap.put("pay_type", 1);
+                            columnMap.put("pay_result", 1);
+                            List<OrderDetail> lists = orderDAO.selectByMap(columnMap);
+                            BigDecimal twoDecimal = new BigDecimal("2");
+                            for (Iterator<OrderDetail> iterator = lists.iterator(); iterator
+                                    .hasNext();) {
+                                OrderDetail orderDetail2 = (OrderDetail) iterator.next();
+                                BigDecimal cashBack = orderDetail2.getCashback().add(twoDecimal);
+                                int days = daysBetween(orderDetail2.getCreateTime(), new Date());
+                                if (days <= 180 && orderDetail2.getAmount()
+                                        .doubleValue() >= cashBack.doubleValue()) {
+                                    resourceUser
+                                            .setBalance(resourceUser.getBalance().add(twoDecimal));
+                                    resourceUser.setCashToday(
+                                            resourceUser.getCashToday().add(twoDecimal));
+                                    resourceUser.setCashShare(
+                                            resourceUser.getCashShare().add(twoDecimal));
+                                    resourceUser.setCashBack(
+                                            resourceUser.getCashBack().add(twoDecimal));
+                                    userService.update(resourceUser,
+                                            new EntityWrapper<User>().eq("openid", resource));
+                                    orderDetail2.setCashback(cashBack);
+                                    orderDAO.updateById(orderDetail2);
+                                    break;
+                                }
                             }
+
                         }
 
                     }
-
+                    // user.setBalance(user.getBalance().add(balance));
+                    user.setOldMember(1);
+                    userService.update(user,
+                            new EntityWrapper<User>().eq("openid", user.getOpenid()));
                 }
-                // user.setBalance(user.getBalance().add(balance));
-                user.setOldMember(1);
-                userService.update(user, new EntityWrapper<User>().eq("openid", user.getOpenid()));
-
                 xml = WXPayUtil.mapToXml(data);
                 logger.debug("wxpay order payback response xml is {}", xml);
                 // 删除缓存
