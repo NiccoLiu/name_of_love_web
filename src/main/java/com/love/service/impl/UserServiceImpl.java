@@ -4,6 +4,7 @@ package com.love.service.impl;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLDecoder;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -325,7 +326,15 @@ public class UserServiceImpl implements UserService {
             resultInfo.setMsg("手机号码未绑定!");
             return resultInfo;
         } else {
-            resultInfo.setData(lists.get(0));
+            Map<String, String> nameMap = new HashMap<>(2);
+            String name = null;
+            try {
+                name = URLDecoder.decode(lists.get(0).getName(), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                logger.error(e.getMessage());
+            }
+            nameMap.put("name", name);
+            resultInfo.setData(nameMap);
             resultInfo.setMsg("手机号码已绑定!");
         }
         return resultInfo;
