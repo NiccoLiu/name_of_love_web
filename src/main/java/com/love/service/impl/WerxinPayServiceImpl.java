@@ -121,13 +121,11 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                     User user = new User();
                     user.setPhone(phone);
                     User userNew = userService.selectOne(user);
-                    if (userNew == null) {
-                        result.setCode(-1);
-                        result.setMsg("手机号码不存在!");
-                        return result;
-                    }
                     OrderDetail order = new OrderDetail();
-                    order.setOpenid(userNew.getOpenid());
+                    if (userNew != null) {
+                        order.setOpenid(userNew.getOpenid());
+                    }
+
                     order.setAmount(new BigDecimal(totalFee));
                     order.setPayType(1);
                     order.setSerialNumber(wxTradeNo);

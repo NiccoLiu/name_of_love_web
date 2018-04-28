@@ -305,6 +305,12 @@ public class UserServiceImpl implements UserService {
         user.setPhone(phone);
         int num = userDAO.update(user, new EntityWrapper<User>().eq("openid", openId));
         if (num > 0) {
+            List<OrderDetail> listOrders = orderDAO.selectByMap(columnMap);
+            for (Iterator<OrderDetail> iterator = listOrders.iterator(); iterator.hasNext();) {
+                OrderDetail orderDetail = (OrderDetail) iterator.next();
+                orderDetail.setOpenid(openId);
+                orderDAO.updateById(orderDetail);
+            }
             resultInfo.setMsg("手机号码绑定成功!");
         } else {
             resultInfo.setCode(-1);
