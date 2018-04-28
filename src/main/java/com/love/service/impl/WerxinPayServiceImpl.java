@@ -213,7 +213,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
                 OrderDetail orderDetailNew = new OrderDetail();
                 orderDetailNew.setSerialNumber(tradeNo);
                 orderDetailNew = orderService.selectOne(orderDetailNew);
-                if (orderDetailNew.getOpenid() != null || !"".equals(orderDetailNew.getOpenid())) {
+                if (orderDetailNew.getOpenid() != null && !"".equals(orderDetailNew.getOpenid())) {
                     // 修改用户余额
                     User user = new User();
                     user.setOpenid(orderDetailNew.getOpenid());
