@@ -42,7 +42,7 @@ public class NameOfLoveWebApplicationTests {
     @Test
     public void generate() {
 
-        String accessToken = redisService.get("token");
+        String accessToken = null;
         if (accessToken == null || "".equals(accessToken)) {
             Token token = WechatHttpUtil.getToken(wechatProp.getTokenUrl(), wechatProp.getAppid(),
                     wechatProp.getAppsecret());

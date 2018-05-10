@@ -100,7 +100,7 @@ public class WerxinPayServiceImpl implements WeixinPayService {
             data.put("notify_url", wechatProp.getTemplateUrl() + File.separator + "wxpay/payback");
             data.put("trade_type", "JSAPI");
             // data.put("fee_type", "CNY");
-            data.put("total_fee", "1");// weixinPayModel.setTotalFee(1);
+            data.put("total_fee", "66600");// weixinPayModel.setTotalFee(1);
             // data.put("time_expire", expireTime);
             Map<String, String> responseData = null;
             redisService.set(wxTradeNo, data.toString(), APP_DATA_CACHED_ALIVE_TIME);

@@ -138,7 +138,7 @@ public class ReceiverMessageServiceImpl implements ReceiverMessageService {
      */
     public String replyText() {
         StringBuffer sb = new StringBuffer();
-        sb.append("这里是以爱为名,健康出行客服中心,如果您在使用过程中有任何疑问,请拨打客服电话：18073920866");
+        sb.append("这里是以爱之名,共享步数客服中心,如果您在使用过程中有任何疑问,请拨打客服电话：18073920866");
         return sb.toString();
     }
 
@@ -149,8 +149,8 @@ public class ReceiverMessageServiceImpl implements ReceiverMessageService {
      */
     public String subscribeText() {
         StringBuffer sb = new StringBuffer();
-        sb.append("您好，欢迎关注以爱为名。\n\n");
-        sb.append("我们的口号是:以爱为名,健康出行!");
+        sb.append("您好，欢迎关注以爱之名。\n\n");
+        sb.append("我们的口号是:以爱之名,共享步数!");
         return sb.toString();
     }
 
